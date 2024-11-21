@@ -16,21 +16,21 @@ func New(postgre *postgre.Repository) *Services {
 	}
 }
 
-func (s *Services) CreateSong(song endpoints.SongRequest) *api.SongInfoResponse {
+func (s *Services) CreateSong(song endpoints.SongRequest) (*api.SongInfoResponse, error) {
 
 	songResp, err := api.GetInfo(song.Group, song.Song)
 	// log.Printf("External_api info: \nDate:%s\nText:%s\nLink:%s", songResp.ReleaseDate, songResp.Text, songResp.Link)
 	if err != nil {
-		return &api.SongInfoResponse{}
+		return nil, err
 	}
 
 	songResp.Group = song.Group
 	songResp.Song = song.Song
 	err = s.postgre.InsertSong(songResp)
 	if err != nil {
-		return &api.SongInfoResponse{}
+		return nil, err
 	}
-	// Возвращаем данные, полученные из внешнего API
-	return songResp
+
+	return songResp, nil
 
 }

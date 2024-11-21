@@ -17,14 +17,15 @@ type SongInfoResponse struct {
 }
 
 var (
-	ErrBadRequest = errors.New("incorrect request")
-	ErrNoResponce = errors.New("no responce from API")
+	ErrBadRequest          = errors.New("incorrect request")
+	ErrNoResponce          = errors.New("no responce from API")
+	ErrInternalServerError = errors.New("InternalServerError")
 )
 
 func GetInfo(group, song string) (*SongInfoResponse, error) {
 	resp, err := http.Get(fmt.Sprintf("%s/info?group=%s&song=%s", os.Getenv("API_URL"), group, song))
 	if err != nil {
-		return nil, err
+		return nil, ErrInternalServerError
 	}
 
 	defer resp.Body.Close()

@@ -24,7 +24,7 @@ func CreateTables() *sql.DB {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 
-	defer db.Close()
+	// defer db.Close()
 
 	driver, err := postgres.WithInstance(db, &postgres.Config{})
 	if err != nil {
