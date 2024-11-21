@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"github.com/sirupsen/logrus"
 )
 
 type Services interface {
@@ -31,6 +32,7 @@ func (e *Endpoints) CreateSong(c *fiber.Ctx) error {
 	if err := c.BodyParser(&song); err != nil {
 		return c.SendStatus(http.StatusBadRequest)
 	}
+	logrus.Info("Данные получены")
 
 	validate := validator.New()
 	err := validate.Struct(song)

@@ -24,8 +24,6 @@ func CreateTables() *sql.DB {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 
-	// defer db.Close()
-
 	driver, err := postgres.WithInstance(db, &postgres.Config{})
 	if err != nil {
 		log.Fatalf("Failed to create migration driver: %v", err)
