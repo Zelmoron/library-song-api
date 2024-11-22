@@ -1,32 +1,21 @@
 basePath: /
 definitions:
-  api.SongInfoResponse:
-    description: Response structure containing song information
+  requests.SongRequest:
+    description: Структура запроса для создания новой песни
     properties:
       group:
-        example: Beatles
-        type: string
-      link:
-        example: https://example.com/song
-        minLength: 0
-        type: string
-      releaseDate:
-        example: "1965-08-06"
+        example: Muse
         minLength: 0
         type: string
       song:
-        example: Yesterday
-        type: string
-      text:
-        example: Yesterday, all my troubles seemed so far away...
+        example: Supermassive Black Hol
         minLength: 0
         type: string
     required:
-    - link
-    - releaseDate
-    - text
+    - group
+    - song
     type: object
-  endpoints.ErrorResponse:
+  responses.ErrorResponse:
     description: Структура ответа при возникновении ошибки
     properties:
       code:
@@ -34,20 +23,59 @@ definitions:
       message:
         type: string
     type: object
-  endpoints.SongRequest:
-    description: Структура запроса для создания новой песни
+  responses.SongInfoResponse:
+    description: Response structure containing song information
     properties:
       group:
-        example: Beatles
+        example: Muse
+        type: string
+      link:
+        example: https://www.youtube.com/watch?v=Xsp3_a-PMTw
+        minLength: 0
+        type: string
+      releaseDate:
+        example: 16.07.2006
         minLength: 0
         type: string
       song:
-        example: Yesterday
+        example: Supermassive Black Hol
+        type: string
+      text:
+        example: |-
+          Ooh baby, don't you know I suffer?
+          Ooh baby, can you hear me moan?
+          You caught me under false pretenses
+          How long before you let me go?
+
+          Ooh
+          You set my soul alight
+          Ooh
+          You set my soul alight
         minLength: 0
         type: string
     required:
-    - group
-    - song
+    - link
+    - releaseDate
+    - text
+    type: object
+  responses.SongsPaginationResponse:
+    properties:
+      limit:
+        example: 10
+        type: integer
+      page:
+        example: 1
+        type: integer
+      songs:
+        items:
+          $ref: '#/definitions/responses.SongInfoResponse'
+        type: array
+      total:
+        example: 31
+        type: integer
+      total_pages:
+        example: 4
+        type: integer
     type: object
 host: localhost:3000
 info:
@@ -68,31 +96,83 @@ paths:
         name: song
         required: true
         schema:
-          $ref: '#/definitions/endpoints.SongRequest'
+          $ref: '#/definitions/requests.SongRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.SongInfoResponse'
+            $ref: '#/definitions/responses.SongInfoResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/endpoints.ErrorResponse'
+            $ref: '#/definitions/responses.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/endpoints.ErrorResponse'
+            $ref: '#/definitions/responses.ErrorResponse'
         "422":
           description: Unprocessable Entity
           schema:
-            $ref: '#/definitions/endpoints.ErrorResponse'
+            $ref: '#/definitions/responses.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/endpoints.ErrorResponse'
+            $ref: '#/definitions/responses.ErrorResponse'
       summary: Add a new song
+      tags:
+      - Songs
+  /songs:
+    get:
+      consumes:
+      - application/json
+      description: Get songs with filtr and pagination
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Number of items per page
+        in: query
+        name: limit
+        type: integer
+      - description: Group filter
+        in: query
+        name: group
+        type: string
+      - description: Song filter
+        in: query
+        name: song
+        type: string
+      - description: releaseDate filter
+        in: query
+        name: releaseDate
+        type: string
+      - description: Text filter
+        in: query
+        name: text
+        type: string
+      - description: Link filter
+        in: query
+        name: link
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.SongsPaginationResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+      summary: Get songs
       tags:
       - Songs
 swagger: "2.0"

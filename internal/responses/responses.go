@@ -12,10 +12,18 @@ type (
 	}
 	// @Description Response structure containing song information
 	SongInfoResponse struct {
-		Group       string `json:"group" example:"Beatles" swagger:"description:Band or artist name"`
-		Song        string `json:"song" example:"Yesterday" swagger:"description:Song title"`
-		ReleaseDate string `json:"releaseDate" validate:"required,min=0" example:"1965-08-06" swagger:"description:Release date"`
-		Text        string `json:"text" validate:"required,min=0" example:"Yesterday, all my troubles seemed so far away..." swagger:"description:Song lyrics"`
-		Link        string `json:"link" validate:"required,min=0" example:"https://example.com/song" swagger:"description:Link to the song"`
+		Group       string `json:"group" example:"Muse" swagger:"description:Band or artist name"`
+		Song        string `json:"song" example:"Supermassive Black Hol" swagger:"description:Song title"`
+		ReleaseDate string `json:"releaseDate" validate:"required,min=0" example:"16.07.2006" swagger:"description:Release date"`
+		Text        string `json:"text" validate:"required,min=0" example:"Ooh baby, don't you know I suffer?\nOoh baby, can you hear me moan?\nYou caught me under false pretenses\nHow long before you let me go?\n\nOoh\nYou set my soul alight\nOoh\nYou set my soul alight" swagger:"description:Song lyrics"`
+		Link        string `json:"link" validate:"required,min=0" example:"https://www.youtube.com/watch?v=Xsp3_a-PMTw" swagger:"description:Link to the song"`
+	}
+
+	SongsPaginationResponse struct {
+		Songs      []SongInfoResponse `json:"songs" `
+		Page       int                `json:"page" example:"1" swagger:"description:Number page"`
+		Limit      int                `json:"limit" example:"10" swagger:"description:Limit"`
+		Total      int                `json:"total" example:"31" swagger:"description:Count of records found "`
+		TotalPages int                `json:"total_pages" example:"4" swagger:"Number of records pages"`
 	}
 )

@@ -41,12 +41,12 @@ func New(services Services, db *postgre.Repository) *Endpoints {
 // @Tags Songs
 // @Accept json
 // @Produce json
-// @Param song body SongRequest true "Song data"
-// @Success 200 {object} api.SongInfoResponse
-// @Failure 400 {object} ErrorResponse
-// @Failure 404 {object} ErrorResponse
-// @Failure 422 {object} ErrorResponse
-// @Failure 500 {object} ErrorResponse
+// @Param song body requests.SongRequest true "Song data"
+// @Success 200 {object} responses.SongInfoResponse
+// @Failure 400 {object} responses.ErrorResponse
+// @Failure 404 {object} responses.ErrorResponse
+// @Failure 422 {object} responses.ErrorResponse
+// @Failure 500 {object} responses.ErrorResponse
 // @Router /song [post]
 func (e *Endpoints) CreateSong(c *fiber.Ctx) error {
 	var song requests.SongRequest
@@ -58,7 +58,7 @@ func (e *Endpoints) CreateSong(c *fiber.Ctx) error {
 		return c.Status(http.StatusBadRequest).JSON(errResp)
 	}
 
-	logrus.Info("Data received")
+	logrus.Info("Данные получены")
 	validate := validator.New()
 	if err := validate.Struct(song); err != nil {
 		errResp := responses.ErrorResponse{
@@ -108,6 +108,24 @@ func (e *Endpoints) CreateSong(c *fiber.Ctx) error {
 }
 
 // http://localhost:3000/songs?page=1&limit=4&group=f
+
+// GetSongs godoc
+// @Summary Get songs
+// @Description Get songs with filtr and pagination
+// @Tags Songs
+// @Accept json
+// @Produce json
+// @Param page query int false "Page number"
+// @Param limit query int false "Number of items per page"
+// @Param group query string false "Group filter"
+// @Param song query string false "Song filter"
+// @Param releaseDate query string false "releaseDate filter"
+// @Param text query string false "Text filter"
+// @Param link query string false "Link filter"
+// @Success 200 {object} responses.SongsPaginationResponse
+// @Failure 404 {object} responses.ErrorResponse
+// @Failure 500 {object} responses.ErrorResponse
+// @Router /songs [get]
 func (e *Endpoints) GetSongs(c *fiber.Ctx) error {
 
 	if e.repository == nil {
@@ -128,7 +146,7 @@ func (e *Endpoints) GetSongs(c *fiber.Ctx) error {
 		})
 	}
 
-	return c.JSON(fiber.Map{
+	return c.Status(http.StatusOK).JSON(fiber.Map{
 		"songs":       songs,
 		"page":        page,
 		"limit":       limit,

@@ -36,7 +36,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/endpoints.SongRequest"
+                            "$ref": "#/definitions/requests.SongRequest"
                         }
                     }
                 ],
@@ -44,31 +44,110 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SongInfoResponse"
+                            "$ref": "#/definitions/responses.SongInfoResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/endpoints.ErrorResponse"
+                            "$ref": "#/definitions/responses.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/endpoints.ErrorResponse"
+                            "$ref": "#/definitions/responses.ErrorResponse"
                         }
                     },
                     "422": {
                         "description": "Unprocessable Entity",
                         "schema": {
-                            "$ref": "#/definitions/endpoints.ErrorResponse"
+                            "$ref": "#/definitions/responses.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/endpoints.ErrorResponse"
+                            "$ref": "#/definitions/responses.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/songs": {
+            "get": {
+                "description": "Get songs with filtr and pagination",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Songs"
+                ],
+                "summary": "Get songs",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of items per page",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Group filter",
+                        "name": "group",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Song filter",
+                        "name": "song",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "releaseDate filter",
+                        "name": "releaseDate",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Text filter",
+                        "name": "text",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Link filter",
+                        "name": "link",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/responses.SongsPaginationResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/responses.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/responses.ErrorResponse"
                         }
                     }
                 }
@@ -76,41 +155,27 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "api.SongInfoResponse": {
-            "description": "Response structure containing song information",
+        "requests.SongRequest": {
+            "description": "Структура запроса для создания новой песни",
             "type": "object",
             "required": [
-                "link",
-                "releaseDate",
-                "text"
+                "group",
+                "song"
             ],
             "properties": {
                 "group": {
                     "type": "string",
-                    "example": "Beatles"
-                },
-                "link": {
-                    "type": "string",
                     "minLength": 0,
-                    "example": "https://example.com/song"
-                },
-                "releaseDate": {
-                    "type": "string",
-                    "minLength": 0,
-                    "example": "1965-08-06"
+                    "example": "Muse"
                 },
                 "song": {
                     "type": "string",
-                    "example": "Yesterday"
-                },
-                "text": {
-                    "type": "string",
                     "minLength": 0,
-                    "example": "Yesterday, all my troubles seemed so far away..."
+                    "example": "Supermassive Black Hol"
                 }
             }
         },
-        "endpoints.ErrorResponse": {
+        "responses.ErrorResponse": {
             "description": "Структура ответа при возникновении ошибки",
             "type": "object",
             "properties": {
@@ -122,23 +187,64 @@ const docTemplate = `{
                 }
             }
         },
-        "endpoints.SongRequest": {
-            "description": "Структура запроса для создания новой песни",
+        "responses.SongInfoResponse": {
+            "description": "Response structure containing song information",
             "type": "object",
             "required": [
-                "group",
-                "song"
+                "link",
+                "releaseDate",
+                "text"
             ],
             "properties": {
                 "group": {
                     "type": "string",
+                    "example": "Muse"
+                },
+                "link": {
+                    "type": "string",
                     "minLength": 0,
-                    "example": "Beatles"
+                    "example": "https://www.youtube.com/watch?v=Xsp3_a-PMTw"
+                },
+                "releaseDate": {
+                    "type": "string",
+                    "minLength": 0,
+                    "example": "16.07.2006"
                 },
                 "song": {
                     "type": "string",
+                    "example": "Supermassive Black Hol"
+                },
+                "text": {
+                    "type": "string",
                     "minLength": 0,
-                    "example": "Yesterday"
+                    "example": "Ooh baby, don't you know I suffer?\nOoh baby, can you hear me moan?\nYou caught me under false pretenses\nHow long before you let me go?\n\nOoh\nYou set my soul alight\nOoh\nYou set my soul alight"
+                }
+            }
+        },
+        "responses.SongsPaginationResponse": {
+            "type": "object",
+            "properties": {
+                "limit": {
+                    "type": "integer",
+                    "example": 10
+                },
+                "page": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "songs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/responses.SongInfoResponse"
+                    }
+                },
+                "total": {
+                    "type": "integer",
+                    "example": 31
+                },
+                "total_pages": {
+                    "type": "integer",
+                    "example": 4
                 }
             }
         }

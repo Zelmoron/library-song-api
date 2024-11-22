@@ -3,8 +3,8 @@ package requests
 type (
 	// @Description Структура запроса для создания новой песни
 	SongRequest struct {
-		Group string `json:"group" validate:"required,min=0" example:"Beatles" swagger:"description:Название группы"`
-		Song  string `json:"song" validate:"required,min=0" example:"Yesterday" swagger:"description:Название песни"`
+		Group string `json:"group" validate:"required,min=0" example:"Muse" swagger:"description:Название группы"`
+		Song  string `json:"song" validate:"required,min=0" example:"Supermassive Black Hol" swagger:"description:Название песни"`
 	}
 	UpdateRequest struct {
 		Group       string `json:"group" validate:"required,min=0"`
