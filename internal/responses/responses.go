@@ -27,3 +27,27 @@ type (
 		TotalPages int                `json:"total_pages" example:"4" swagger:"Number of records pages"`
 	}
 )
+
+//Струкутры для ошибок
+
+type (
+	ErrorResponse400 struct {
+		Code    int    `json:"code" example:"400" `
+		Message string `json:"message" example:"Bad Request - Invalid input data"`
+	}
+
+	ErrorResponse422 struct {
+		Code    int    `json:"code" example:"422" `
+		Message string `json:"message" example:"Unprocessable Entity - Validation failed"`
+	}
+
+	ErrorResponse404 struct {
+		Code    int    `json:"code" example:"404" `
+		Message string `json:"message" example:"Not Found - Song not found"`
+	}
+
+	ErrorResponse500 struct {
+		Code    int    `json:"code" example:"500" `
+		Message string `json:"message" example:"Internal Server Error"`
+	}
+)

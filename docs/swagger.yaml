@@ -15,12 +15,40 @@ definitions:
     - group
     - song
     type: object
-  responses.ErrorResponse:
-    description: Структура ответа при возникновении ошибки
+  responses.ErrorResponse400:
     properties:
       code:
+        example: 400
         type: integer
       message:
+        example: Bad Request - Invalid input data
+        type: string
+    type: object
+  responses.ErrorResponse404:
+    properties:
+      code:
+        example: 404
+        type: integer
+      message:
+        example: Not Found - Song not found
+        type: string
+    type: object
+  responses.ErrorResponse422:
+    properties:
+      code:
+        example: 422
+        type: integer
+      message:
+        example: Unprocessable Entity - Validation failed
+        type: string
+    type: object
+  responses.ErrorResponse500:
+    properties:
+      code:
+        example: 500
+        type: integer
+      message:
+        example: Internal Server Error
         type: string
     type: object
   responses.SongInfoResponse:
@@ -107,19 +135,19 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/responses.ErrorResponse'
+            $ref: '#/definitions/responses.ErrorResponse400'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/responses.ErrorResponse'
+            $ref: '#/definitions/responses.ErrorResponse404'
         "422":
           description: Unprocessable Entity
           schema:
-            $ref: '#/definitions/responses.ErrorResponse'
+            $ref: '#/definitions/responses.ErrorResponse422'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/responses.ErrorResponse'
+            $ref: '#/definitions/responses.ErrorResponse500'
       summary: Add a new song
       tags:
       - Songs
@@ -167,11 +195,11 @@ paths:
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/responses.ErrorResponse'
+            $ref: '#/definitions/responses.ErrorResponse404'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/responses.ErrorResponse'
+            $ref: '#/definitions/responses.ErrorResponse500'
       summary: Get songs
       tags:
       - Songs

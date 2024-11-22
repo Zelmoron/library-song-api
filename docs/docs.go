@@ -50,25 +50,25 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/responses.ErrorResponse"
+                            "$ref": "#/definitions/responses.ErrorResponse400"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/responses.ErrorResponse"
+                            "$ref": "#/definitions/responses.ErrorResponse404"
                         }
                     },
                     "422": {
                         "description": "Unprocessable Entity",
                         "schema": {
-                            "$ref": "#/definitions/responses.ErrorResponse"
+                            "$ref": "#/definitions/responses.ErrorResponse422"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/responses.ErrorResponse"
+                            "$ref": "#/definitions/responses.ErrorResponse500"
                         }
                     }
                 }
@@ -141,13 +141,13 @@ const docTemplate = `{
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/responses.ErrorResponse"
+                            "$ref": "#/definitions/responses.ErrorResponse404"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/responses.ErrorResponse"
+                            "$ref": "#/definitions/responses.ErrorResponse500"
                         }
                     }
                 }
@@ -175,15 +175,55 @@ const docTemplate = `{
                 }
             }
         },
-        "responses.ErrorResponse": {
-            "description": "Структура ответа при возникновении ошибки",
+        "responses.ErrorResponse400": {
             "type": "object",
             "properties": {
                 "code": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 400
                 },
                 "message": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Bad Request - Invalid input data"
+                }
+            }
+        },
+        "responses.ErrorResponse404": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "example": 404
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Not Found - Song not found"
+                }
+            }
+        },
+        "responses.ErrorResponse422": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "example": 422
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Unprocessable Entity - Validation failed"
+                }
+            }
+        },
+        "responses.ErrorResponse500": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "example": 500
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Internal Server Error"
                 }
             }
         },

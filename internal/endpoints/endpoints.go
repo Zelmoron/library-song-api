@@ -43,10 +43,10 @@ func New(services Services, db *postgre.Repository) *Endpoints {
 // @Produce json
 // @Param song body requests.SongRequest true "Song data"
 // @Success 200 {object} responses.SongInfoResponse
-// @Failure 400 {object} responses.ErrorResponse
-// @Failure 404 {object} responses.ErrorResponse
-// @Failure 422 {object} responses.ErrorResponse
-// @Failure 500 {object} responses.ErrorResponse
+// @Failure 400 {object} responses.ErrorResponse400
+// @Failure 404 {object} responses.ErrorResponse404
+// @Failure 422 {object} responses.ErrorResponse422
+// @Failure 500 {object} responses.ErrorResponse500
 // @Router /song [post]
 func (e *Endpoints) CreateSong(c *fiber.Ctx) error {
 	var song requests.SongRequest
@@ -123,8 +123,8 @@ func (e *Endpoints) CreateSong(c *fiber.Ctx) error {
 // @Param text query string false "Text filter"
 // @Param link query string false "Link filter"
 // @Success 200 {object} responses.SongsPaginationResponse
-// @Failure 404 {object} responses.ErrorResponse
-// @Failure 500 {object} responses.ErrorResponse
+// @Failure 404 {object} responses.ErrorResponse404
+// @Failure 500 {object} responses.ErrorResponse500
 // @Router /songs [get]
 func (e *Endpoints) GetSongs(c *fiber.Ctx) error {
 
