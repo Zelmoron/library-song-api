@@ -15,12 +15,20 @@ type Repository struct {
 	db *sql.DB
 }
 
+// VerseFilter содержит параметры для фильтрации куплетов
+type VerseFilter struct {
+	PageSize int // количество куплетов на странице
+	Page     int // номер страницы куплетов
+}
+
 type SongFilter struct {
-	Group       string `json:"group"`
-	Song        string `json:"song"`
-	ReleaseDate string `json:"release_date"`
-	Text        string `json:"text"`
-	Link        string `json:"link"`
+	Group       string   `json:"group"`
+	Song        string   `json:"song"`
+	ReleaseDate string   `json:"release_date"`
+	Text        string   `json:"text"`
+	Link        string   `json:"link"`
+	Verses      []string `json:"verses"`       // массив куплетов
+	TotalVerses int      `json:"total_verses"` // общее количество куплетов
 }
 
 func New(db *sql.DB) *Repository {
@@ -158,4 +166,83 @@ func (r *Repository) GetSongs(filter SongFilter, page, limit int) ([]*api.SongIn
 	}
 
 	return songs, totalCount, nil
+}
+
+func (r *Repository) GetSongsWithVerses(filter SongFilter, verseFilter VerseFilter) ([]*SongFilter, int, error) {
+	// Получаем песни с помощью существующего метода
+	songs, totalCount, err := r.GetSongs(filter, 1, 100) // Получаем все подходящие песни
+	if err != nil {
+		return nil, 0, fmt.Errorf("failed to get songs: %w", err)
+	}
+
+	// Создаем слайс для результатов с куплетами
+	songsWithVerses := make([]*SongFilter, 0, len(songs))
+
+	for _, song := range songs {
+		// Разбиваем текст на куплеты
+		verses := splitIntoVerses(song.Text)
+
+		// Вычисляем начальный и конечный индексы для текущей страницы куплетов
+		startIdx := (verseFilter.Page - 1) * verseFilter.PageSize
+		endIdx := startIdx + verseFilter.PageSize
+
+		// Проверяем границы
+		if startIdx >= len(verses) {
+			continue
+		}
+		if endIdx > len(verses) {
+			endIdx = len(verses)
+		}
+
+		// Создаем структуру с пагинированными куплетами
+		songWithVerses := &SongFilter{
+			Group:       song.Group,
+			Song:        song.Song,
+			ReleaseDate: song.ReleaseDate,
+			Verses:      verses[startIdx:endIdx],
+			TotalVerses: len(verses),
+			Link:        song.Link,
+		}
+
+		songsWithVerses = append(songsWithVerses, songWithVerses)
+	}
+
+	return songsWithVerses, totalCount, nil
+}
+
+// splitIntoVerses разбивает текст песни на куплеты
+func splitIntoVerses(text string) []string {
+	if text == "" {
+		return []string{}
+	}
+
+	// Разбиваем текст на строки
+	lines := strings.Split(text, "\n")
+
+	verses := make([]string, 0)
+	currentVerse := make([]string, 0)
+
+	for _, line := range lines {
+		trimmedLine := strings.TrimSpace(line)
+
+		// Если строка пустая и у нас есть накопленный куплет
+		if trimmedLine == "" && len(currentVerse) > 0 {
+			// Добавляем накопленный куплет в результат
+			verses = append(verses, strings.Join(currentVerse, "\n"))
+			currentVerse = make([]string, 0)
+			continue
+		}
+
+		// Если строка не пустая, добавляем её к текущему куплету
+		if trimmedLine != "" {
+			currentVerse = append(currentVerse, trimmedLine)
+		}
+	}
+
+	// Добавляем последний куплет, если он есть
+	if len(currentVerse) > 0 {
+		verses = append(verses, strings.Join(currentVerse, "\n"))
+	}
+
+	return verses
 }

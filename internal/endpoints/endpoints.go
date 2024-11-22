@@ -13,6 +13,7 @@ import (
 type Services interface {
 	CreateSong(SongRequest) (*api.SongInfoResponse, error)
 	GetSongs(*postgre.Repository, *fiber.Ctx, int, int) ([]*api.SongInfoResponse, int, int, int, int)
+	GetSongsWithVerses(*postgre.Repository, *fiber.Ctx, string, int) []string
 }
 type Endpoints struct {
 	repository *postgre.Repository
@@ -29,10 +30,16 @@ func New(services Services, db *postgre.Repository) *Endpoints {
 	}
 }
 
-type SongRequest struct {
-	Group string `json:"group" validate:"required,min=0"`
-	Song  string `json:"song" validate:"required,min=0"`
-}
+type (
+	SongRequest struct {
+		Group string `json:"group" validate:"required,min=0"`
+		Song  string `json:"song" validate:"required,min=0"`
+	}
+	SongResponse struct {
+		Song   string   `json:"song"`
+		Verses []string `json:"verses"`
+	}
+)
 
 func (e *Endpoints) CreateSong(c *fiber.Ctx) error {
 	var song SongRequest
@@ -72,6 +79,7 @@ func (e *Endpoints) CreateSong(c *fiber.Ctx) error {
 	return c.Status(http.StatusOK).JSON(response)
 }
 
+// http://localhost:3000/songs?page=1&limit=4&group=f
 func (e *Endpoints) GetSongs(c *fiber.Ctx) error {
 
 	if e.repository == nil {
@@ -99,4 +107,45 @@ func (e *Endpoints) GetSongs(c *fiber.Ctx) error {
 		"total":       totalCount,
 		"total_pages": totalPages,
 	})
+}
+
+// http://localhost:3000/song-verse?song=f&verses=5
+func (e *Endpoints) GetSongsWithVerses(c *fiber.Ctx) error {
+	if e.repository == nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Repository not initialized",
+		})
+	}
+
+	// Получаем только название песни и количество куплетов из URL
+	songName := c.Query("song")
+	versesLimit := c.QueryInt("verses", 5) // По умолчанию 5 куплетов
+
+	// Проверяем обязательные параметры
+	if songName == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Song name is required",
+		})
+	}
+
+	if versesLimit < 1 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Number of verses must be greater than 0",
+		})
+	}
+
+	verses := e.services.GetSongsWithVerses(e.repository, c, songName, versesLimit)
+	if len(verses) == 0 {
+		logrus.Error("Failed to retrieve song")
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": "Failed to retrieve song",
+		})
+	}
+	// Формируем упрощенный ответ
+	response := SongResponse{
+		Song:   songName,
+		Verses: verses[:versesLimit],
+	}
+
+	return c.JSON(response)
 }

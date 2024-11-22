@@ -14,6 +14,7 @@ import (
 	"github.com/gofiber/swagger"
 
 	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/fiber/v2/middleware/recover"
 )
 
 type App struct {
@@ -27,7 +28,7 @@ func New() *App {
 	app := &App{}
 
 	app.app = fiber.New()
-	app.app.Use(logger.New())
+	app.app.Use(logger.New(), recover.New())
 	db := database.CreateTables()
 	app.postgre = postgre.New(db)
 	app.services = services.New(app.postgre)
@@ -42,6 +43,7 @@ func (a *App) routers() {
 
 	a.app.Post("/song", a.endpoints.CreateSong)
 	a.app.Get("/songs", a.endpoints.GetSongs)
+	a.app.Get("/song-verse", a.endpoints.GetSongsWithVerses)
 
 	a.app.Get("/info", func(c *fiber.Ctx) error {
 

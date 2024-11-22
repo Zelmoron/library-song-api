@@ -5,6 +5,7 @@ import (
 	"EffectiveMobile/internal/endpoints"
 	"EffectiveMobile/internal/postgre"
 	"math"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/sirupsen/logrus"
@@ -40,7 +41,6 @@ func (s *Services) CreateSong(song endpoints.SongRequest) (*api.SongInfoResponse
 }
 
 func (s *Services) GetSongs(repository *postgre.Repository, c *fiber.Ctx, page, limit int) ([]*api.SongInfoResponse, int, int, int, int) {
-	// Обновленный фильтр с новыми полями
 
 	filter := &postgre.SongFilter{
 		Group:       c.Query("group"),
@@ -68,4 +68,69 @@ func (s *Services) GetSongs(repository *postgre.Repository, c *fiber.Ctx, page, 
 
 	return songs, page, limit, totalCount, totalPages
 
+}
+
+func (s *Services) GetSongsWithVerses(repository *postgre.Repository, c *fiber.Ctx, songName string, versesLimit int) []string {
+	// Создаем минимальный фильтр только по названию песни
+	filter := postgre.SongFilter{
+		Song: songName,
+	}
+
+	// Получаем песню
+	songs, _, err := repository.GetSongs(filter, 1, 1)
+
+	if err != nil {
+		return []string{}
+	}
+
+	if len(songs) == 0 {
+		return []string{}
+	}
+	// Получаем куплеты
+	verses := splitIntoVerses(songs[0].Text)
+
+	// Ограничиваем количество куплетов
+	if versesLimit > len(verses) {
+		versesLimit = len(verses)
+	}
+
+	return verses
+}
+
+// splitIntoVerses разбивает текст песни на куплеты
+func splitIntoVerses(text string) []string {
+	// Проверяем, не пустой ли текст
+	if text == "" {
+		return []string{}
+	}
+
+	// Разбиваем текст на строки
+	lines := strings.Split(text, "\n")
+	verses := make([]string, 0)
+	currentVerse := make([]string, 0)
+
+	for _, line := range lines {
+		trimmedLine := strings.TrimSpace(line)
+
+		// Если строка пустая и у нас есть накопленный куплет
+		if trimmedLine == "" && len(currentVerse) > 0 {
+			// Добавляем накопленный куплет в результат
+			verses = append(verses, strings.Join(currentVerse, "\n"))
+			// Очищаем текущий куплет для следующего
+			currentVerse = make([]string, 0)
+			continue
+		}
+
+		// Если строка не пустая, добавляем её к текущему куплету
+		if trimmedLine != "" {
+			currentVerse = append(currentVerse, trimmedLine)
+		}
+	}
+
+	// Добавляем последний куплет, если он есть
+	if len(currentVerse) > 0 {
+		verses = append(verses, strings.Join(currentVerse, "\n"))
+	}
+
+	return verses
 }
