@@ -3,6 +3,9 @@ package endpoints
 import (
 	"EffectiveMobile/internal/api"
 	"EffectiveMobile/internal/postgre"
+	"EffectiveMobile/internal/requests"
+	"EffectiveMobile/internal/responses"
+
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
@@ -11,9 +14,10 @@ import (
 )
 
 type Services interface {
-	CreateSong(SongRequest) (*api.SongInfoResponse, error)
-	GetSongs(*postgre.Repository, *fiber.Ctx, int, int) ([]*api.SongInfoResponse, int, int, int, int)
+	CreateSong(requests.SongRequest) (*responses.SongInfoResponse, error)
+	GetSongs(*postgre.Repository, *fiber.Ctx, int, int) ([]*responses.SongInfoResponse, int, int, int, int)
 	GetSongsWithVerses(*postgre.Repository, *fiber.Ctx, string, int) []string
+	UpdateSong(*postgre.Repository, string, requests.UpdateRequest) error
 }
 type Endpoints struct {
 	repository *postgre.Repository
@@ -30,71 +34,75 @@ func New(services Services, db *postgre.Repository) *Endpoints {
 	}
 }
 
-type (
-	SongRequest struct {
-		Group string `json:"group" validate:"required,min=0"`
-		Song  string `json:"song" validate:"required,min=0"`
-	}
-	SongResponse struct {
-		Song   string   `json:"song"`
-		Verses []string `json:"verses"`
-	}
-	// ErrorResponse - структура для ошибок
-	ErrorResponse struct {
-		Code    int    `json:"code"`
-		Message string `json:"message"`
-	}
-)
-
 // CreateSong godoc
-// @Summary      Добавить песню
-// @Description  Добавить новую песню
-// @Tags         Песни
-// @Accept       json
-// @Produce      json
-// @Param        song  body      SongRequest  true  "Данные песни"
-// @Success      200   {object}  api.SongInfoResponse
-// @Failure      400   {object}  ErrorResponse  "Некорректный запрос"
-// @Failure      422   {object}  ErrorResponse  "Ошибка валидации"
-// @Failure      404   {object}  ErrorResponse  "Песня не найдена"
-// @Failure      500   {object}  ErrorResponse  "Внутренняя ошибка сервера"
-// @Router       /song [post]
+// @Summary Add a new song
+// @Description Create a new song entry
+// @Tags Songs
+// @Accept json
+// @Produce json
+// @Param song body SongRequest true "Song data"
+// @Success 200 {object} api.SongInfoResponse
+// @Failure 400 {object} ErrorResponse
+// @Failure 404 {object} ErrorResponse
+// @Failure 422 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /song [post]
 func (e *Endpoints) CreateSong(c *fiber.Ctx) error {
-	var song SongRequest
+	var song requests.SongRequest
 	if err := c.BodyParser(&song); err != nil {
-		return c.SendStatus(http.StatusBadRequest)
+		errResp := responses.ErrorResponse{
+			Code:    http.StatusBadRequest,
+			Message: "Bad Request - Invalid input data",
+		}
+		return c.Status(http.StatusBadRequest).JSON(errResp)
 	}
-	logrus.Info("Данные получены")
 
+	logrus.Info("Data received")
 	validate := validator.New()
-	err := validate.Struct(song)
-	if err != nil {
-		return c.Status(fiber.StatusUnprocessableEntity).SendString(err.Error())
+	if err := validate.Struct(song); err != nil {
+		errResp := responses.ErrorResponse{
+			Code:    fiber.StatusUnprocessableEntity, // 422
+			Message: "Unprocessable Entity - Validation failed",
+		}
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(errResp)
 	}
 
 	response, err := e.services.CreateSong(song)
 	if err != nil {
-		var statusCode int
-		var message string
+		var errResp responses.ErrorResponse
+
 		switch err {
 		case api.ErrBadRequest:
-			statusCode = fiber.StatusBadRequest
-			message = err.Error()
+			errResp = responses.ErrorResponse{
+				Code:    fiber.StatusBadRequest,
+				Message: "Bad Request - Invalid input data",
+			}
+			return c.Status(fiber.StatusBadRequest).JSON(errResp)
+
 		case api.ErrNoResponce:
-			statusCode = fiber.StatusNotFound
-			message = err.Error()
+			errResp = responses.ErrorResponse{
+				Code:    fiber.StatusNotFound,
+				Message: "Not Found - Song not found",
+			}
+			return c.Status(fiber.StatusNotFound).JSON(errResp)
+
 		default:
-			statusCode = fiber.StatusInternalServerError
-			message = "unexpected error"
+			errResp = responses.ErrorResponse{
+				Code:    fiber.StatusInternalServerError,
+				Message: "Internal Server Error",
+			}
+			return c.Status(fiber.StatusInternalServerError).JSON(errResp)
 		}
-		return c.Status(statusCode).JSON(ErrorResponse{
-			Code:    statusCode,
-			Message: message,
-		})
 	}
+
 	if response == nil {
-		return c.SendStatus(http.StatusNotFound)
+		errResp := responses.ErrorResponse{
+			Code:    http.StatusNotFound,
+			Message: "Not Found - Song not found",
+		}
+		return c.Status(http.StatusNotFound).JSON(errResp)
 	}
+
 	return c.Status(http.StatusOK).JSON(response)
 }
 
@@ -161,10 +169,35 @@ func (e *Endpoints) GetSongsWithVerses(c *fiber.Ctx) error {
 		})
 	}
 	// Формируем упрощенный ответ
-	response := SongResponse{
+	response := responses.SongResponse{
 		Song:   songName,
 		Verses: verses[:versesLimit],
 	}
 
 	return c.JSON(response)
+}
+
+func (e *Endpoints) UpdateSong(c *fiber.Ctx) error {
+
+	id := c.Params("id")
+	var update requests.UpdateRequest
+	if err := c.BodyParser(&update); err != nil {
+		errResp := responses.ErrorResponse{
+			Code:    fiber.StatusBadRequest,
+			Message: "Bad Request - Invalid input data",
+		}
+		return c.Status(http.StatusBadRequest).JSON(errResp)
+	}
+
+	err := e.services.UpdateSong(e.repository, id, update)
+	if err != nil {
+		logrus.Error(err)
+		return c.Status(http.StatusNotModified).JSON(responses.ErrorResponse{
+			Code:    http.StatusNotModified,
+			Message: "Failed to update",
+		})
+	}
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"message": "Update succeeded",
+	})
 }

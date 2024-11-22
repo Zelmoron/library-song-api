@@ -2,10 +2,12 @@ package services
 
 import (
 	"EffectiveMobile/internal/api"
-	"EffectiveMobile/internal/endpoints"
 	"EffectiveMobile/internal/postgre"
+	"EffectiveMobile/internal/requests"
+	"EffectiveMobile/internal/responses"
+	"EffectiveMobile/internal/utils"
 	"math"
-	"strings"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/sirupsen/logrus"
@@ -21,7 +23,7 @@ func New(postgre *postgre.Repository) *Services {
 	}
 }
 
-func (s *Services) CreateSong(song endpoints.SongRequest) (*api.SongInfoResponse, error) {
+func (s *Services) CreateSong(song requests.SongRequest) (*responses.SongInfoResponse, error) {
 
 	songResp, err := api.GetInfo(song.Group, song.Song)
 	// log.Printf("External_api info: \nDate:%s\nText:%s\nLink:%s", songResp.ReleaseDate, songResp.Text, songResp.Link)
@@ -40,12 +42,12 @@ func (s *Services) CreateSong(song endpoints.SongRequest) (*api.SongInfoResponse
 
 }
 
-func (s *Services) GetSongs(repository *postgre.Repository, c *fiber.Ctx, page, limit int) ([]*api.SongInfoResponse, int, int, int, int) {
+func (s *Services) GetSongs(repository *postgre.Repository, c *fiber.Ctx, page, limit int) ([]*responses.SongInfoResponse, int, int, int, int) {
 
 	filter := &postgre.SongFilter{
 		Group:       c.Query("group"),
 		Song:        c.Query("song"),
-		ReleaseDate: c.Query("release_date"),
+		ReleaseDate: c.Query("releaseDate"),
 		Text:        c.Query("text"),
 		Link:        c.Query("link"),
 	}
@@ -57,7 +59,7 @@ func (s *Services) GetSongs(repository *postgre.Repository, c *fiber.Ctx, page, 
 		limit = 10
 	}
 
-	songs, totalCount, err := repository.GetSongs(*filter, page, limit)
+	songs, totalCount, err := s.postgre.GetSongs(*filter, page, limit)
 	if err != nil {
 		logrus.Errorf("Failed to retrieve songs: %v", err)
 		return nil, 0, 0, 0, 0
@@ -71,7 +73,7 @@ func (s *Services) GetSongs(repository *postgre.Repository, c *fiber.Ctx, page, 
 }
 
 func (s *Services) GetSongsWithVerses(repository *postgre.Repository, c *fiber.Ctx, songName string, versesLimit int) []string {
-	// Создаем минимальный фильтр только по названию песни
+
 	filter := postgre.SongFilter{
 		Song: songName,
 	}
@@ -87,7 +89,7 @@ func (s *Services) GetSongsWithVerses(repository *postgre.Repository, c *fiber.C
 		return []string{}
 	}
 	// Получаем куплеты
-	verses := splitIntoVerses(songs[0].Text)
+	verses := utils.SplitIntoVerses(songs[0].Text)
 
 	// Ограничиваем количество куплетов
 	if versesLimit > len(verses) {
@@ -97,40 +99,18 @@ func (s *Services) GetSongsWithVerses(repository *postgre.Repository, c *fiber.C
 	return verses
 }
 
-// splitIntoVerses разбивает текст песни на куплеты
-func splitIntoVerses(text string) []string {
-	// Проверяем, не пустой ли текст
-	if text == "" {
-		return []string{}
+func (s *Services) UpdateSong(repository *postgre.Repository, id string, update requests.UpdateRequest) error {
+	ID, err := strconv.Atoi(id)
+	if err != nil {
+		return err
 	}
 
-	// Разбиваем текст на строки
-	lines := strings.Split(text, "\n")
-	verses := make([]string, 0)
-	currentVerse := make([]string, 0)
+	err = repository.Update(ID, update)
 
-	for _, line := range lines {
-		trimmedLine := strings.TrimSpace(line)
-
-		// Если строка пустая и у нас есть накопленный куплет
-		if trimmedLine == "" && len(currentVerse) > 0 {
-			// Добавляем накопленный куплет в результат
-			verses = append(verses, strings.Join(currentVerse, "\n"))
-			// Очищаем текущий куплет для следующего
-			currentVerse = make([]string, 0)
-			continue
-		}
-
-		// Если строка не пустая, добавляем её к текущему куплету
-		if trimmedLine != "" {
-			currentVerse = append(currentVerse, trimmedLine)
-		}
+	if err != nil {
+		return err
 	}
 
-	// Добавляем последний куплет, если он есть
-	if len(currentVerse) > 0 {
-		verses = append(verses, strings.Join(currentVerse, "\n"))
-	}
+	return nil
 
-	return verses
 }

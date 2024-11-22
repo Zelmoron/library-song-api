@@ -1,6 +1,7 @@
 package api
 
 import (
+	"EffectiveMobile/internal/responses"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -11,21 +12,13 @@ import (
 	"github.com/gofiber/fiber/v2/log"
 )
 
-type SongInfoResponse struct {
-	Group       string `json:"group" `
-	Song        string `json:"song" `
-	ReleaseDate string `json:"releaseDate" validate:"required,min=0"`
-	Text        string `json:"text" validate:"required,min=0"`
-	Link        string `json:"link" validate:"required,min=0"`
-}
-
 var (
 	ErrBadRequest          = errors.New("incorrect request")
 	ErrNoResponce          = errors.New("no responce from API")
 	ErrInternalServerError = errors.New("InternalServerError")
 )
 
-func GetInfo(group, song string) (*SongInfoResponse, error) {
+func GetInfo(group, song string) (*responses.SongInfoResponse, error) {
 	resp, err := http.Get(fmt.Sprintf("%s/info?group=%s&song=%s", os.Getenv("API_URL"), group, song))
 	if err != nil {
 		return nil, ErrInternalServerError
@@ -41,7 +34,7 @@ func GetInfo(group, song string) (*SongInfoResponse, error) {
 		}
 	}
 
-	var response SongInfoResponse
+	var response responses.SongInfoResponse
 	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
 		return nil, err
 	}

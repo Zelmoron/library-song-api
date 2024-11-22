@@ -1,7 +1,9 @@
 package postgre
 
 import (
-	"EffectiveMobile/internal/api"
+	"EffectiveMobile/internal/requests"
+	"EffectiveMobile/internal/responses"
+
 	"context"
 	"database/sql"
 	"fmt"
@@ -37,7 +39,7 @@ func New(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) InsertSong(song *api.SongInfoResponse) error {
+func (r *Repository) InsertSong(song *responses.SongInfoResponse) error {
 
 	query := `
 	INSERT INTO songs ("group", song, release_date, text, link)
@@ -68,7 +70,7 @@ func (r *Repository) InsertSong(song *api.SongInfoResponse) error {
 	return nil
 }
 
-func (r *Repository) GetSongs(filter SongFilter, page, limit int) ([]*api.SongInfoResponse, int, error) {
+func (r *Repository) GetSongs(filter SongFilter, page, limit int) ([]*responses.SongInfoResponse, int, error) {
 	query := `
         SELECT "group", song, release_date, text, link
         FROM songs
@@ -145,9 +147,9 @@ func (r *Repository) GetSongs(filter SongFilter, page, limit int) ([]*api.SongIn
 	}
 	defer rows.Close()
 
-	var songs []*api.SongInfoResponse
+	var songs []*responses.SongInfoResponse
 	for rows.Next() {
-		song := &api.SongInfoResponse{}
+		song := &responses.SongInfoResponse{}
 		err := rows.Scan(
 			&song.Group,
 			&song.Song,
@@ -245,4 +247,53 @@ func splitIntoVerses(text string) []string {
 	}
 
 	return verses
+}
+
+func (r *Repository) Update(id int, req requests.UpdateRequest) error {
+	// Проверяем существование записи
+	query := `SELECT id FROM songs WHERE id = $1`
+	var existingID int
+	err := r.db.QueryRow(query, id).Scan(&existingID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return fmt.Errorf("song with id %d not found", id)
+		}
+		return fmt.Errorf("failed to check song existence: %w", err)
+	}
+
+	// Выполняем обновление
+	updateQuery := `
+        UPDATE songs
+        SET
+            "group" = $1,
+            song = $2,
+            release_date = $3,
+            text = $4,
+            link = $5
+        WHERE id = $6
+    `
+
+	result, err := r.db.Exec(updateQuery,
+		req.Group,
+		req.Song,
+		req.ReleaseDate,
+		req.Text,
+		req.Link,
+		id,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to update song: %w", err)
+	}
+
+	// Проверяем, что запись была обновлена
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get rows affected: %w", err)
+	}
+
+	if rowsAffected == 0 {
+		return fmt.Errorf("song with id %d was not updated", id)
+	}
+
+	return nil
 }

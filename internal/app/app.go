@@ -1,7 +1,6 @@
 package app
 
 import (
-	"EffectiveMobile/internal/api"
 	"EffectiveMobile/internal/database"
 	"EffectiveMobile/internal/endpoints"
 	"EffectiveMobile/internal/postgre"
@@ -43,16 +42,17 @@ func (a *App) routers() {
 	a.app.Post("/song", a.endpoints.CreateSong)              //Добавление новой песни в бд
 	a.app.Get("/songs", a.endpoints.GetSongs)                //получение всех песен с пагинацией и фильтрацией
 	a.app.Get("/song-verse", a.endpoints.GetSongsWithVerses) //получение песни и пагинация по куплетам
+	a.app.Patch("/song/:id", a.endpoints.UpdateSong)
 
-	a.app.Get("/info", func(c *fiber.Ctx) error {
+	// a.app.Get("/info", func(c *fiber.Ctx) error {
 
-		response := api.SongInfoResponse{
-			ReleaseDate: "16.07.2006",
-			Text:        "Ooh baby, don't you know I suffer?\nOoh baby, can you hear me moan?\nYou caught me under false pretenses\nHow long before you let me go?\n\nOoh\nYou set my soul alight\nOoh\nYou set my soul alight",
-			Link:        "https://www.youtube.com/watch?v=Xsp3_a-PMTw",
-		}
-		return c.Status(fiber.StatusOK).JSON(response)
-	})
+	// 	response := responses.SongInfoResponse{
+	// 		ReleaseDate: "16.07.2006",
+	// 		Text:        "Ooh baby, don't you know I suffer?\nOoh baby, can you hear me moan?\nYou caught me under false pretenses\nHow long before you let me go?\n\nOoh\nYou set my soul alight\nOoh\nYou set my soul alight",
+	// 		Link:        "https://www.youtube.com/watch?v=Xsp3_a-PMTw",
+	// 	}
+	// 	return c.Status(fiber.StatusOK).JSON(response)
+	// })
 	a.app.Get("/swagger/*", swagger.HandlerDefault)
 }
 

@@ -1,18 +1,24 @@
 basePath: /
 definitions:
   api.SongInfoResponse:
+    description: Response structure containing song information
     properties:
       group:
+        example: Beatles
         type: string
       link:
+        example: https://example.com/song
         minLength: 0
         type: string
       releaseDate:
+        example: "1965-08-06"
         minLength: 0
         type: string
       song:
+        example: Yesterday
         type: string
       text:
+        example: Yesterday, all my troubles seemed so far away...
         minLength: 0
         type: string
     required:
@@ -21,6 +27,7 @@ definitions:
     - text
     type: object
   endpoints.ErrorResponse:
+    description: Структура ответа при возникновении ошибки
     properties:
       code:
         type: integer
@@ -28,11 +35,14 @@ definitions:
         type: string
     type: object
   endpoints.SongRequest:
+    description: Структура запроса для создания новой песни
     properties:
       group:
+        example: Beatles
         minLength: 0
         type: string
       song:
+        example: Yesterday
         minLength: 0
         type: string
     required:
@@ -51,9 +61,9 @@ paths:
     post:
       consumes:
       - application/json
-      description: Добавить новую песню
+      description: Create a new song entry
       parameters:
-      - description: Данные песни
+      - description: Song data
         in: body
         name: song
         required: true
@@ -67,22 +77,22 @@ paths:
           schema:
             $ref: '#/definitions/api.SongInfoResponse'
         "400":
-          description: Некорректный запрос
+          description: Bad Request
           schema:
             $ref: '#/definitions/endpoints.ErrorResponse'
         "404":
-          description: Песня не найдена
+          description: Not Found
           schema:
             $ref: '#/definitions/endpoints.ErrorResponse'
         "422":
-          description: Ошибка валидации
+          description: Unprocessable Entity
           schema:
             $ref: '#/definitions/endpoints.ErrorResponse'
         "500":
-          description: Внутренняя ошибка сервера
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/endpoints.ErrorResponse'
-      summary: Добавить песню
+      summary: Add a new song
       tags:
-      - Песни
+      - Songs
 swagger: "2.0"

@@ -18,7 +18,7 @@ const docTemplate = `{
     "paths": {
         "/song": {
             "post": {
-                "description": "Добавить новую песню",
+                "description": "Create a new song entry",
                 "consumes": [
                     "application/json"
                 ],
@@ -26,12 +26,12 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Песни"
+                    "Songs"
                 ],
-                "summary": "Добавить песню",
+                "summary": "Add a new song",
                 "parameters": [
                     {
-                        "description": "Данные песни",
+                        "description": "Song data",
                         "name": "song",
                         "in": "body",
                         "required": true,
@@ -48,25 +48,25 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Некорректный запрос",
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/endpoints.ErrorResponse"
                         }
                     },
                     "404": {
-                        "description": "Песня не найдена",
+                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/endpoints.ErrorResponse"
                         }
                     },
                     "422": {
-                        "description": "Ошибка валидации",
+                        "description": "Unprocessable Entity",
                         "schema": {
                             "$ref": "#/definitions/endpoints.ErrorResponse"
                         }
                     },
                     "500": {
-                        "description": "Внутренняя ошибка сервера",
+                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/endpoints.ErrorResponse"
                         }
@@ -77,6 +77,7 @@ const docTemplate = `{
     },
     "definitions": {
         "api.SongInfoResponse": {
+            "description": "Response structure containing song information",
             "type": "object",
             "required": [
                 "link",
@@ -85,26 +86,32 @@ const docTemplate = `{
             ],
             "properties": {
                 "group": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Beatles"
                 },
                 "link": {
                     "type": "string",
-                    "minLength": 0
+                    "minLength": 0,
+                    "example": "https://example.com/song"
                 },
                 "releaseDate": {
                     "type": "string",
-                    "minLength": 0
+                    "minLength": 0,
+                    "example": "1965-08-06"
                 },
                 "song": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Yesterday"
                 },
                 "text": {
                     "type": "string",
-                    "minLength": 0
+                    "minLength": 0,
+                    "example": "Yesterday, all my troubles seemed so far away..."
                 }
             }
         },
         "endpoints.ErrorResponse": {
+            "description": "Структура ответа при возникновении ошибки",
             "type": "object",
             "properties": {
                 "code": {
@@ -116,6 +123,7 @@ const docTemplate = `{
             }
         },
         "endpoints.SongRequest": {
+            "description": "Структура запроса для создания новой песни",
             "type": "object",
             "required": [
                 "group",
@@ -124,11 +132,13 @@ const docTemplate = `{
             "properties": {
                 "group": {
                     "type": "string",
-                    "minLength": 0
+                    "minLength": 0,
+                    "example": "Beatles"
                 },
                 "song": {
                     "type": "string",
-                    "minLength": 0
+                    "minLength": 0,
+                    "example": "Yesterday"
                 }
             }
         }
