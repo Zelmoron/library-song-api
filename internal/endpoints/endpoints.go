@@ -2,7 +2,6 @@ package endpoints
 
 import (
 	"EffectiveMobile/internal/api"
-	"EffectiveMobile/internal/postgre"
 	"EffectiveMobile/internal/requests"
 	"EffectiveMobile/internal/responses"
 
@@ -15,23 +14,19 @@ import (
 
 type Services interface {
 	CreateSong(requests.SongRequest) (*responses.SongInfoResponse, error)
-	GetSongs(*postgre.Repository, *fiber.Ctx, int, int) ([]*responses.SongInfoResponse, int, int, int, int)
-	GetSongsWithVerses(*postgre.Repository, *fiber.Ctx, string, int) []string
-	UpdateSong(*postgre.Repository, string, requests.UpdateRequest) error
-	DeleteSong(*postgre.Repository, string) error
+	GetSongs(*fiber.Ctx, int, int) ([]*responses.SongInfoResponse, int, int, int, int)
+	GetSongsWithVerses(*fiber.Ctx, string, int) []string
+	UpdateSong(string, requests.UpdateRequest) error
+	DeleteSong(string) error
 }
 type Endpoints struct {
-	repository *postgre.Repository
-	services   Services
+	services Services
 }
 
-func New(services Services, db *postgre.Repository) *Endpoints {
-	if db == nil {
-		panic("database repository cannot be nil")
-	}
+func New(services Services) *Endpoints {
+
 	return &Endpoints{
-		services:   services,
-		repository: db,
+		services: services,
 	}
 }
 
@@ -128,16 +123,11 @@ func (e *Endpoints) CreateSong(c *fiber.Ctx) error {
 // @Router /songs [get]
 func (e *Endpoints) GetSongs(c *fiber.Ctx) error {
 
-	if e.repository == nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Repository not initialized",
-		})
-	}
 	//Пагинация (выводит 10 записей)
 	page := c.QueryInt("page", 1)
 	limit := c.QueryInt("limit", 10)
 
-	songs, page, limit, totalCount, totalPages := e.services.GetSongs(e.repository, c, page, limit)
+	songs, page, limit, totalCount, totalPages := e.services.GetSongs(c, page, limit)
 
 	if len(songs) == 0 {
 		logrus.Error("Failed to retrieve songs")
@@ -157,11 +147,6 @@ func (e *Endpoints) GetSongs(c *fiber.Ctx) error {
 
 // http://localhost:3000/song-verse?song=f&verses=5
 func (e *Endpoints) GetSongsWithVerses(c *fiber.Ctx) error {
-	if e.repository == nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Repository not initialized",
-		})
-	}
 
 	// Получаем только название песни и количество куплетов из URL
 	songName := c.Query("song")
@@ -180,7 +165,7 @@ func (e *Endpoints) GetSongsWithVerses(c *fiber.Ctx) error {
 		})
 	}
 
-	verses := e.services.GetSongsWithVerses(e.repository, c, songName, versesLimit)
+	verses := e.services.GetSongsWithVerses(c, songName, versesLimit)
 	if len(verses) == 0 {
 		logrus.Error("Failed to retrieve song")
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
@@ -208,7 +193,7 @@ func (e *Endpoints) UpdateSong(c *fiber.Ctx) error {
 		return c.Status(http.StatusBadRequest).JSON(errResp)
 	}
 
-	err := e.services.UpdateSong(e.repository, id, update)
+	err := e.services.UpdateSong(id, update)
 	if err != nil {
 		logrus.Error(err)
 		return c.Status(http.StatusNotModified).JSON(responses.ErrorResponse{
@@ -225,7 +210,7 @@ func (e *Endpoints) DeleteSong(c *fiber.Ctx) error {
 
 	id := c.Params("id")
 
-	err := e.services.DeleteSong(e.repository, id)
+	err := e.services.DeleteSong(id)
 	if err != nil {
 		logrus.Error(err)
 		return c.Status(http.StatusInternalServerError).JSON(responses.ErrorResponse{

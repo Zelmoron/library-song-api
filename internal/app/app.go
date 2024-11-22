@@ -27,12 +27,12 @@ func New() *App {
 	//Настройки приложения
 	app := &App{}
 
-	app.app = fiber.New()                                    //Получаем fiber
-	app.app.Use(logger.New(), recover.New())                 //Добавляем логирование и обработку паники, если такая возникнет
-	db := database.CreateTables()                            //Создаем таблицы и получаем бд
-	app.postgre = postgre.New(db)                            //Получаем стуктуру Repository
-	app.services = services.New(app.postgre)                 //Получаем стуктуру Services
-	app.endpoints = endpoints.New(app.services, app.postgre) //Получаем стуктуру Endpoints
+	app.app = fiber.New()                       //Получаем fiber
+	app.app.Use(logger.New(), recover.New())    //Добавляем логирование и обработку паники, если такая возникнет
+	db := database.CreateTables()               //Создаем таблицы и получаем бд
+	app.postgre = postgre.New(db)               //Получаем стуктуру Repository
+	app.services = services.New(app.postgre)    //Получаем стуктуру Services
+	app.endpoints = endpoints.New(app.services) //Получаем стуктуру Endpoints
 
 	app.routers() //Роутеры
 

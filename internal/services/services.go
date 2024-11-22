@@ -42,7 +42,7 @@ func (s *Services) CreateSong(song requests.SongRequest) (*responses.SongInfoRes
 
 }
 
-func (s *Services) GetSongs(repository *postgre.Repository, c *fiber.Ctx, page, limit int) ([]*responses.SongInfoResponse, int, int, int, int) {
+func (s *Services) GetSongs(c *fiber.Ctx, page, limit int) ([]*responses.SongInfoResponse, int, int, int, int) {
 
 	filter := &postgre.SongFilter{
 		Group:       c.Query("group"),
@@ -72,14 +72,14 @@ func (s *Services) GetSongs(repository *postgre.Repository, c *fiber.Ctx, page, 
 
 }
 
-func (s *Services) GetSongsWithVerses(repository *postgre.Repository, c *fiber.Ctx, songName string, versesLimit int) []string {
+func (s *Services) GetSongsWithVerses(c *fiber.Ctx, songName string, versesLimit int) []string {
 
 	filter := postgre.SongFilter{
 		Song: songName,
 	}
 
 	// Получаем песню
-	songs, _, err := repository.GetSongs(filter, 1, 1)
+	songs, _, err := s.postgre.GetSongs(filter, 1, 1)
 
 	if err != nil {
 		return []string{}
@@ -99,13 +99,13 @@ func (s *Services) GetSongsWithVerses(repository *postgre.Repository, c *fiber.C
 	return verses
 }
 
-func (s *Services) UpdateSong(repository *postgre.Repository, id string, update requests.UpdateRequest) error {
+func (s *Services) UpdateSong(id string, update requests.UpdateRequest) error {
 	ID, err := strconv.Atoi(id)
 	if err != nil {
 		return err
 	}
 
-	err = repository.Update(ID, update)
+	err = s.postgre.Update(ID, update)
 
 	if err != nil {
 		return err
@@ -115,13 +115,13 @@ func (s *Services) UpdateSong(repository *postgre.Repository, id string, update 
 
 }
 
-func (s *Services) DeleteSong(repository *postgre.Repository, id string) error {
+func (s *Services) DeleteSong(id string) error {
 	ID, err := strconv.Atoi(id)
 	if err != nil {
 		return err
 	}
 
-	err = repository.Delete(ID)
+	err = s.postgre.Delete(ID)
 
 	if err != nil {
 		return err
