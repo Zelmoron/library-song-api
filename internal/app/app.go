@@ -8,8 +8,6 @@ import (
 	"EffectiveMobile/internal/services"
 	"os"
 
-	_ "EffectiveMobile/documentation"
-
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/swagger"
 
@@ -25,25 +23,26 @@ type App struct {
 }
 
 func New() *App {
+	//Настройки приложения
 	app := &App{}
 
-	app.app = fiber.New()
-	app.app.Use(logger.New(), recover.New())
-	db := database.CreateTables()
-	app.postgre = postgre.New(db)
-	app.services = services.New(app.postgre)
-	app.endpoints = endpoints.New(app.services, app.postgre)
+	app.app = fiber.New()                                    //Получаем fiber
+	app.app.Use(logger.New(), recover.New())                 //Добавляем логирование и обработку паники, если такая возникнет
+	db := database.CreateTables()                            //Создаем таблицы и получаем бд
+	app.postgre = postgre.New(db)                            //Получаем стуктуру Repository
+	app.services = services.New(app.postgre)                 //Получаем стуктуру Services
+	app.endpoints = endpoints.New(app.services, app.postgre) //Получаем стуктуру Endpoints
 
-	app.routers()
+	app.routers() //Роутеры
 
 	return app
 }
 
 func (a *App) routers() {
 
-	a.app.Post("/song", a.endpoints.CreateSong)
-	a.app.Get("/songs", a.endpoints.GetSongs)
-	a.app.Get("/song-verse", a.endpoints.GetSongsWithVerses)
+	a.app.Post("/song", a.endpoints.CreateSong)              //Добавление новой песни в бд
+	a.app.Get("/songs", a.endpoints.GetSongs)                //получение всех песен с пагинацией и фильтрацией
+	a.app.Get("/song-verse", a.endpoints.GetSongsWithVerses) //получение песни и пагинация по куплетам
 
 	a.app.Get("/info", func(c *fiber.Ctx) error {
 
@@ -58,5 +57,5 @@ func (a *App) routers() {
 }
 
 func (a *App) Run() {
-	a.app.Listen(os.Getenv("PORT"))
+	a.app.Listen(os.Getenv("PORT")) //Стартуем на порту, указаном  в env
 }

@@ -1,0 +1,130 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Rest API Library",
+        "title": "TZ",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:3000",
+    "basePath": "/",
+    "paths": {
+        "/song": {
+            "post": {
+                "description": "Добавить новую песню",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Песни"
+                ],
+                "summary": "Добавить песню",
+                "parameters": [
+                    {
+                        "description": "Данные песни",
+                        "name": "song",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/endpoints.SongRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.SongInfoResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректный запрос",
+                        "schema": {
+                            "$ref": "#/definitions/endpoints.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Песня не найдена",
+                        "schema": {
+                            "$ref": "#/definitions/endpoints.ErrorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Ошибка валидации",
+                        "schema": {
+                            "$ref": "#/definitions/endpoints.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/endpoints.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "api.SongInfoResponse": {
+            "type": "object",
+            "required": [
+                "link",
+                "releaseDate",
+                "text"
+            ],
+            "properties": {
+                "group": {
+                    "type": "string"
+                },
+                "link": {
+                    "type": "string",
+                    "minLength": 0
+                },
+                "releaseDate": {
+                    "type": "string",
+                    "minLength": 0
+                },
+                "song": {
+                    "type": "string"
+                },
+                "text": {
+                    "type": "string",
+                    "minLength": 0
+                }
+            }
+        },
+        "endpoints.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "endpoints.SongRequest": {
+            "type": "object",
+            "required": [
+                "group",
+                "song"
+            ],
+            "properties": {
+                "group": {
+                    "type": "string",
+                    "minLength": 0
+                },
+                "song": {
+                    "type": "string",
+                    "minLength": 0
+                }
+            }
+        }
+    }
+}

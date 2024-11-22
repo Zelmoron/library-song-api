@@ -39,8 +39,26 @@ type (
 		Song   string   `json:"song"`
 		Verses []string `json:"verses"`
 	}
+	// ErrorResponse - структура для ошибок
+	ErrorResponse struct {
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+	}
 )
 
+// CreateSong godoc
+// @Summary      Добавить песню
+// @Description  Добавить новую песню
+// @Tags         Песни
+// @Accept       json
+// @Produce      json
+// @Param        song  body      SongRequest  true  "Данные песни"
+// @Success      200   {object}  api.SongInfoResponse
+// @Failure      400   {object}  ErrorResponse  "Некорректный запрос"
+// @Failure      422   {object}  ErrorResponse  "Ошибка валидации"
+// @Failure      404   {object}  ErrorResponse  "Песня не найдена"
+// @Failure      500   {object}  ErrorResponse  "Внутренняя ошибка сервера"
+// @Router       /song [post]
 func (e *Endpoints) CreateSong(c *fiber.Ctx) error {
 	var song SongRequest
 	if err := c.BodyParser(&song); err != nil {
@@ -60,17 +78,18 @@ func (e *Endpoints) CreateSong(c *fiber.Ctx) error {
 		var message string
 		switch err {
 		case api.ErrBadRequest:
-			statusCode = http.StatusBadRequest
+			statusCode = fiber.StatusBadRequest
 			message = err.Error()
 		case api.ErrNoResponce:
-			statusCode = http.StatusNotFound
+			statusCode = fiber.StatusNotFound
 			message = err.Error()
 		default:
 			statusCode = fiber.StatusInternalServerError
 			message = "unexpected error"
 		}
-		return c.Status(statusCode).JSON(fiber.Map{
-			"error": message,
+		return c.Status(statusCode).JSON(ErrorResponse{
+			Code:    statusCode,
+			Message: message,
 		})
 	}
 	if response == nil {

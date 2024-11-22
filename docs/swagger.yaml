@@ -1,0 +1,88 @@
+basePath: /
+definitions:
+  api.SongInfoResponse:
+    properties:
+      group:
+        type: string
+      link:
+        minLength: 0
+        type: string
+      releaseDate:
+        minLength: 0
+        type: string
+      song:
+        type: string
+      text:
+        minLength: 0
+        type: string
+    required:
+    - link
+    - releaseDate
+    - text
+    type: object
+  endpoints.ErrorResponse:
+    properties:
+      code:
+        type: integer
+      message:
+        type: string
+    type: object
+  endpoints.SongRequest:
+    properties:
+      group:
+        minLength: 0
+        type: string
+      song:
+        minLength: 0
+        type: string
+    required:
+    - group
+    - song
+    type: object
+host: localhost:3000
+info:
+  contact: {}
+  description: Rest API Library
+  termsOfService: http://swagger.io/terms/
+  title: TZ
+  version: "1.0"
+paths:
+  /song:
+    post:
+      consumes:
+      - application/json
+      description: Добавить новую песню
+      parameters:
+      - description: Данные песни
+        in: body
+        name: song
+        required: true
+        schema:
+          $ref: '#/definitions/endpoints.SongRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SongInfoResponse'
+        "400":
+          description: Некорректный запрос
+          schema:
+            $ref: '#/definitions/endpoints.ErrorResponse'
+        "404":
+          description: Песня не найдена
+          schema:
+            $ref: '#/definitions/endpoints.ErrorResponse'
+        "422":
+          description: Ошибка валидации
+          schema:
+            $ref: '#/definitions/endpoints.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/endpoints.ErrorResponse'
+      summary: Добавить песню
+      tags:
+      - Песни
+swagger: "2.0"
