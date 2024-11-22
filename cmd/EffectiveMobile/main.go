@@ -14,6 +14,7 @@ func init() {
 	}
 
 }
+
 func main() {
 	app := app.New()
 	app.Run()

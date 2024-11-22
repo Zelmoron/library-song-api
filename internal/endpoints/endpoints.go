@@ -2,6 +2,7 @@ package endpoints
 
 import (
 	"EffectiveMobile/internal/api"
+	"EffectiveMobile/internal/postgre"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
@@ -11,14 +12,20 @@ import (
 
 type Services interface {
 	CreateSong(SongRequest) (*api.SongInfoResponse, error)
+	GetSongs(*postgre.Repository, *fiber.Ctx, int, int) ([]*api.SongInfoResponse, int, int, int, int)
 }
 type Endpoints struct {
-	services Services
+	repository *postgre.Repository
+	services   Services
 }
 
-func New(services Services) *Endpoints {
+func New(services Services, db *postgre.Repository) *Endpoints {
+	if db == nil {
+		panic("database repository cannot be nil")
+	}
 	return &Endpoints{
-		services: services,
+		services:   services,
+		repository: db,
 	}
 }
 
@@ -63,4 +70,33 @@ func (e *Endpoints) CreateSong(c *fiber.Ctx) error {
 		return c.SendStatus(http.StatusNotFound)
 	}
 	return c.Status(http.StatusOK).JSON(response)
+}
+
+func (e *Endpoints) GetSongs(c *fiber.Ctx) error {
+
+	if e.repository == nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Repository not initialized",
+		})
+	}
+	//Пагинация (выводит 10 записей)
+	page := c.QueryInt("page", 1)
+	limit := c.QueryInt("limit", 10)
+
+	songs, page, limit, totalCount, totalPages := e.services.GetSongs(e.repository, c, page, limit)
+
+	if len(songs) == 0 {
+		logrus.Error("Failed to retrieve songs")
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"message": "No songs found",
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"songs":       songs,
+		"page":        page,
+		"limit":       limit,
+		"total":       totalCount,
+		"total_pages": totalPages,
+	})
 }

@@ -6,11 +6,12 @@ import (
 	"EffectiveMobile/internal/endpoints"
 	"EffectiveMobile/internal/postgre"
 	"EffectiveMobile/internal/services"
-	"math"
 	"os"
 
+	_ "EffectiveMobile/documentation"
+
 	"github.com/gofiber/fiber/v2"
-	"github.com/sirupsen/logrus"
+	"github.com/gofiber/swagger"
 
 	"github.com/gofiber/fiber/v2/middleware/logger"
 )
@@ -30,7 +31,7 @@ func New() *App {
 	db := database.CreateTables()
 	app.postgre = postgre.New(db)
 	app.services = services.New(app.postgre)
-	app.endpoints = endpoints.New(app.services)
+	app.endpoints = endpoints.New(app.services, app.postgre)
 
 	app.routers()
 
@@ -38,56 +39,9 @@ func New() *App {
 }
 
 func (a *App) routers() {
+
 	a.app.Post("/song", a.endpoints.CreateSong)
-	a.app.Get("/songs", func(c *fiber.Ctx) error {
-		page := c.QueryInt("page", 1)
-		limit := c.QueryInt("limit", 10)
-
-		// Create filter struct
-		filter := &postgre.SongFilter{
-			Group:       c.Query("group"),
-			Song:        c.Query("song"),
-			ReleaseDate: c.Query("release_date"),
-		}
-
-		// Validate page and limit
-		if page < 1 {
-			page = 1
-		}
-		if limit < 1 || limit > 100 {
-			limit = 10
-		}
-
-		// Call repository method
-		songs, totalCount, err := a.postgre.GetSongs(filter, page, limit)
-		if err != nil {
-			logrus.Errorf("Failed to retrieve songs: %v", err)
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"error":   "Failed to retrieve songs",
-				"details": err.Error(),
-			})
-		}
-
-		// Check if no songs found
-		if len(songs) == 0 {
-			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-				"message": "No songs found",
-				"filter":  filter,
-			})
-		}
-
-		// Calculate total pages
-		totalPages := int(math.Ceil(float64(totalCount) / float64(limit)))
-
-		// Return response
-		return c.JSON(fiber.Map{
-			"songs":       songs,
-			"page":        page,
-			"limit":       limit,
-			"total":       totalCount,
-			"total_pages": totalPages,
-		})
-	})
+	a.app.Get("/songs", a.endpoints.GetSongs)
 
 	a.app.Get("/info", func(c *fiber.Ctx) error {
 
@@ -98,7 +52,7 @@ func (a *App) routers() {
 		}
 		return c.Status(fiber.StatusOK).JSON(response)
 	})
-
+	a.app.Get("/swagger/*", swagger.HandlerDefault)
 }
 
 func (a *App) Run() {
