@@ -297,3 +297,36 @@ func (r *Repository) Update(id int, req requests.UpdateRequest) error {
 
 	return nil
 }
+
+func (r *Repository) Delete(id int) error {
+	query := `SELECT id FROM songs WHERE id = $1`
+	var existingID int
+	err := r.db.QueryRow(query, id).Scan(&existingID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return fmt.Errorf("song with id %d not found", id)
+		}
+		return fmt.Errorf("failed to check song existence: %w", err)
+	}
+
+	// Выполняем удаление
+	deleteQuery := `DELETE FROM songs WHERE id = $1`
+
+	result, err := r.db.Exec(deleteQuery, id)
+	if err != nil {
+		return fmt.Errorf("failed to delete song: %w", err)
+	}
+
+	// Проверяем, что запись была удалена
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get rows affected: %w", err)
+	}
+
+	if rowsAffected == 0 {
+		return fmt.Errorf("song with id %d was not deleted", id)
+	}
+
+	return nil
+
+}

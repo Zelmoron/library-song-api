@@ -42,7 +42,8 @@ func (a *App) routers() {
 	a.app.Post("/song", a.endpoints.CreateSong)              //Добавление новой песни в бд
 	a.app.Get("/songs", a.endpoints.GetSongs)                //получение всех песен с пагинацией и фильтрацией
 	a.app.Get("/song-verse", a.endpoints.GetSongsWithVerses) //получение песни и пагинация по куплетам
-	a.app.Patch("/song/:id", a.endpoints.UpdateSong)
+	a.app.Patch("/song/:id", a.endpoints.UpdateSong)         //Обновление песни
+	a.app.Delete("/song/:id", a.endpoints.DeleteSong)
 
 	// a.app.Get("/info", func(c *fiber.Ctx) error {
 

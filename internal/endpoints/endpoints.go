@@ -18,6 +18,7 @@ type Services interface {
 	GetSongs(*postgre.Repository, *fiber.Ctx, int, int) ([]*responses.SongInfoResponse, int, int, int, int)
 	GetSongsWithVerses(*postgre.Repository, *fiber.Ctx, string, int) []string
 	UpdateSong(*postgre.Repository, string, requests.UpdateRequest) error
+	DeleteSong(*postgre.Repository, string) error
 }
 type Endpoints struct {
 	repository *postgre.Repository
@@ -199,5 +200,22 @@ func (e *Endpoints) UpdateSong(c *fiber.Ctx) error {
 	}
 	return c.Status(http.StatusOK).JSON(fiber.Map{
 		"message": "Update succeeded",
+	})
+}
+
+func (e *Endpoints) DeleteSong(c *fiber.Ctx) error {
+
+	id := c.Params("id")
+
+	err := e.services.DeleteSong(e.repository, id)
+	if err != nil {
+		logrus.Error(err)
+		return c.Status(http.StatusInternalServerError).JSON(responses.ErrorResponse{
+			Code:    http.StatusInternalServerError,
+			Message: "Failed to delete",
+		})
+	}
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"message": "Delete succeeded",
 	})
 }

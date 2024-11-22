@@ -114,3 +114,19 @@ func (s *Services) UpdateSong(repository *postgre.Repository, id string, update 
 	return nil
 
 }
+
+func (s *Services) DeleteSong(repository *postgre.Repository, id string) error {
+	ID, err := strconv.Atoi(id)
+	if err != nil {
+		return err
+	}
+
+	err = repository.Delete(ID)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+
+}
