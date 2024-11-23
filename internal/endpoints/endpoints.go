@@ -63,6 +63,7 @@ func (e *Endpoints) CreateSong(c *fiber.Ctx) error {
 			Code:    fiber.StatusUnprocessableEntity, // 422
 			Message: "Unprocessable Entity - Validation failed",
 		}
+		logrus.Error("Данные не прошли валидацию")
 		return c.Status(fiber.StatusUnprocessableEntity).JSON(errResp)
 	}
 
@@ -178,6 +179,7 @@ func (e *Endpoints) GetSongsWithVerses(c *fiber.Ctx) error {
 	}
 
 	if versesLimit < 1 {
+		logrus.Info("Кол-во куплетов должно быть больше 0")
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Number of verses must be greater than 0",
 		})

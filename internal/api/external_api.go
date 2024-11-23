@@ -9,7 +9,7 @@ import (
 	"os"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/gofiber/fiber/v2/log"
+	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -43,7 +43,7 @@ func GetInfo(group, song string) (*responses.SongInfoResponse, error) {
 	validate := validator.New()
 	err = validate.Struct(response)
 	if err != nil {
-		log.Info("Полученые API данные не прошли валидацию, скорее всего пустая строка")
+		logrus.Error("Данные не прошли валидацию")
 		return nil, ErrBadRequest
 	}
 
