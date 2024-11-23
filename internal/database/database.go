@@ -10,6 +10,7 @@ import (
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/lib/pq"
+	"github.com/sirupsen/logrus"
 )
 
 func CreateTables() *sql.DB {
@@ -46,6 +47,6 @@ func CreateTables() *sql.DB {
 	// 	log.Fatalf("Failed to down migrations: %v", err)
 	// }
 
-	log.Println("Migrations applied successfully!")
+	logrus.Println("Migrations applied successfully!")
 	return db
 }

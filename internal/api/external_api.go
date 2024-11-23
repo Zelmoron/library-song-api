@@ -46,5 +46,6 @@ func GetInfo(group, song string) (*responses.SongInfoResponse, error) {
 		log.Info("Полученые API данные не прошли валидацию, скорее всего пустая строка")
 		return nil, ErrBadRequest
 	}
+
 	return &response, nil
 }

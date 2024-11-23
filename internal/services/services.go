@@ -30,6 +30,7 @@ func (s *Services) CreateSong(song requests.SongRequest) (*responses.SongInfoRes
 	if err != nil {
 		return nil, err
 	}
+	logrus.Info("Данные из API получены успешно")
 
 	songResp.Group = song.Group
 	songResp.Song = song.Song

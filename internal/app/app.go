@@ -69,4 +69,5 @@ func (a *App) routers() {
 
 func (a *App) Run() {
 	a.app.Listen(os.Getenv("PORT")) //Стартуем на порту, указаном  в env
+
 }
