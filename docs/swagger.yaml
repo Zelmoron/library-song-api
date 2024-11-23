@@ -15,6 +15,41 @@ definitions:
     - group
     - song
     type: object
+  requests.UpdateRequest:
+    properties:
+      group:
+        example: Eminem
+        minLength: 0
+        type: string
+      link:
+        example: http://example.com
+        minLength: 0
+        type: string
+      releaseDate:
+        example: 00.00.00
+        minLength: 0
+        type: string
+      song:
+        example: SOng
+        minLength: 0
+        type: string
+      text:
+        example: LaLala
+        minLength: 0
+        type: string
+    required:
+    - group
+    - link
+    - releaseDate
+    - song
+    - text
+    type: object
+  responses.DeleteResponse:
+    properties:
+      message:
+        example: Delete succeeded
+        type: string
+    type: object
   responses.ErrorResponse400:
     properties:
       code:
@@ -86,6 +121,15 @@ definitions:
     - releaseDate
     - text
     type: object
+  responses.SongResponse:
+    properties:
+      song:
+        type: string
+      verses:
+        items:
+          type: string
+        type: array
+    type: object
   responses.SongsPaginationResponse:
     properties:
       limit:
@@ -104,6 +148,12 @@ definitions:
       total_pages:
         example: 4
         type: integer
+    type: object
+  responses.UpdateResponse:
+    properties:
+      message:
+        example: Update succeeded
+        type: string
     type: object
 host: localhost:3000
 info:
@@ -149,6 +199,105 @@ paths:
           schema:
             $ref: '#/definitions/responses.ErrorResponse500'
       summary: Add a new song
+      tags:
+      - Songs
+  /song-verse:
+    get:
+      consumes:
+      - application/json
+      description: Get song with pagination on verses
+      parameters:
+      - description: Song filter
+        in: query
+        name: song
+        type: string
+      - description: Verses filter
+        in: query
+        name: verses
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.SongResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse400'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse404'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse500'
+      summary: Get Songs With Verses
+      tags:
+      - Songs
+  /song/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete songs
+      parameters:
+      - description: song id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.DeleteResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse400'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse500'
+      summary: Delete songs
+      tags:
+      - Songs
+    patch:
+      consumes:
+      - application/json
+      description: Update songs
+      parameters:
+      - description: song id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Song data
+        in: body
+        name: song
+        required: true
+        schema:
+          $ref: '#/definitions/requests.UpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.UpdateResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse400'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse500'
+      summary: Update songs
       tags:
       - Songs
   /songs:

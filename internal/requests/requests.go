@@ -7,10 +7,10 @@ type (
 		Song  string `json:"song" validate:"required,min=0" example:"Supermassive Black Hol" swagger:"description:Название песни"`
 	}
 	UpdateRequest struct {
-		Group       string `json:"group" validate:"required,min=0"`
-		Song        string `json:"song" validate:"required,min=0"`
-		ReleaseDate string `json:"releaseDate" validate:"required,min=0" `
-		Text        string `json:"text" validate:"required,min=0" `
-		Link        string `json:"link" validate:"required,min=0" `
+		Group       string `json:"group" validate:"required,min=0" example:"Eminem"`
+		Song        string `json:"song" validate:"required,min=0" example:"SOng"`
+		ReleaseDate string `json:"releaseDate" validate:"required,min=0" example:"00.00.00"`
+		Text        string `json:"text" validate:"required,min=0" example:"LaLala"`
+		Link        string `json:"link" validate:"required,min=0" example:"http://example.com"`
 	}
 )

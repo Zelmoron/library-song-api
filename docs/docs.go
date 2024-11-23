@@ -74,6 +74,156 @@ const docTemplate = `{
                 }
             }
         },
+        "/song-verse": {
+            "get": {
+                "description": "Get song with pagination on verses",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Songs"
+                ],
+                "summary": "Get Songs With Verses",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Song filter",
+                        "name": "song",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Verses filter",
+                        "name": "verses",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/responses.SongResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/responses.ErrorResponse400"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/responses.ErrorResponse404"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/responses.ErrorResponse500"
+                        }
+                    }
+                }
+            }
+        },
+        "/song/{id}": {
+            "delete": {
+                "description": "Delete songs",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Songs"
+                ],
+                "summary": "Delete songs",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "song id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/responses.DeleteResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/responses.ErrorResponse400"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/responses.ErrorResponse500"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Update songs",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Songs"
+                ],
+                "summary": "Update songs",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "song id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Song data",
+                        "name": "song",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/requests.UpdateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/responses.UpdateResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/responses.ErrorResponse400"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/responses.ErrorResponse500"
+                        }
+                    }
+                }
+            }
+        },
         "/songs": {
             "get": {
                 "description": "Get songs with filtr and pagination",
@@ -175,6 +325,52 @@ const docTemplate = `{
                 }
             }
         },
+        "requests.UpdateRequest": {
+            "type": "object",
+            "required": [
+                "group",
+                "link",
+                "releaseDate",
+                "song",
+                "text"
+            ],
+            "properties": {
+                "group": {
+                    "type": "string",
+                    "minLength": 0,
+                    "example": "Eminem"
+                },
+                "link": {
+                    "type": "string",
+                    "minLength": 0,
+                    "example": "http://example.com"
+                },
+                "releaseDate": {
+                    "type": "string",
+                    "minLength": 0,
+                    "example": "00.00.00"
+                },
+                "song": {
+                    "type": "string",
+                    "minLength": 0,
+                    "example": "SOng"
+                },
+                "text": {
+                    "type": "string",
+                    "minLength": 0,
+                    "example": "LaLala"
+                }
+            }
+        },
+        "responses.DeleteResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "Delete succeeded"
+                }
+            }
+        },
         "responses.ErrorResponse400": {
             "type": "object",
             "properties": {
@@ -261,6 +457,20 @@ const docTemplate = `{
                 }
             }
         },
+        "responses.SongResponse": {
+            "type": "object",
+            "properties": {
+                "song": {
+                    "type": "string"
+                },
+                "verses": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "responses.SongsPaginationResponse": {
             "type": "object",
             "properties": {
@@ -285,6 +495,15 @@ const docTemplate = `{
                 "total_pages": {
                     "type": "integer",
                     "example": 4
+                }
+            }
+        },
+        "responses.UpdateResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "Update succeeded"
                 }
             }
         }

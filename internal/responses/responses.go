@@ -26,6 +26,12 @@ type (
 		Total      int                `json:"total" example:"31" swagger:"description:Count of records found "`
 		TotalPages int                `json:"total_pages" example:"4" swagger:"Number of records pages"`
 	}
+	UpdateResponse struct {
+		Message string `json:"message" example:"Update succeeded" swagger:"description:Update succeeded"`
+	}
+	DeleteResponse struct {
+		Message string `json:"message" example:"Delete succeeded" swagger:"description:Delete succeeded"`
+	}
 )
 
 //Струкутры для ошибок

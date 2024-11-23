@@ -4,6 +4,7 @@ import (
 	"EffectiveMobile/internal/api"
 	"EffectiveMobile/internal/requests"
 	"EffectiveMobile/internal/responses"
+	"fmt"
 
 	"net/http"
 
@@ -146,11 +147,25 @@ func (e *Endpoints) GetSongs(c *fiber.Ctx) error {
 }
 
 // http://localhost:3000/song-verse?song=f&verses=5
+
+// GetSongsWithVerses godoc
+// @Summary Get Songs With Verses
+// @Description Get song with pagination on verses
+// @Tags Songs
+// @Accept json
+// @Produce json
+// @Param song query string false "Song filter"
+// @Param verses query string false "Verses filter"
+// @Success 200 {object} responses.SongResponse
+// @Failure 400 {object} responses.ErrorResponse400
+// @Failure 404 {object} responses.ErrorResponse404
+// @Failure 500 {object} responses.ErrorResponse500
+// @Router /song-verse [get]
 func (e *Endpoints) GetSongsWithVerses(c *fiber.Ctx) error {
 
 	// Получаем только название песни и количество куплетов из URL
 	songName := c.Query("song")
-	versesLimit := c.QueryInt("verses", 5) // По умолчанию 5 куплетов
+	versesLimit := c.QueryInt("verses", 1) // По умолчанию 5 куплетов
 
 	// Проверяем обязательные параметры
 	if songName == "" {
@@ -167,20 +182,37 @@ func (e *Endpoints) GetSongsWithVerses(c *fiber.Ctx) error {
 
 	verses := e.services.GetSongsWithVerses(c, songName, versesLimit)
 	if len(verses) == 0 {
-		logrus.Error("Failed to retrieve song")
+		logrus.Error("Ошибка получения песни")
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"error": "Failed to retrieve song",
 		})
 	}
-	// Формируем упрощенный ответ
+
+	if versesLimit > len(verses) {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"message": fmt.Sprintf("This song have only %d verses", len(verses)),
+		})
+	}
 	response := responses.SongResponse{
 		Song:   songName,
 		Verses: verses[:versesLimit],
 	}
 
-	return c.JSON(response)
+	return c.Status(http.StatusOK).JSON(response)
 }
 
+// Update godoc
+// @Summary Update songs
+// @Description Update songs
+// @Tags Songs
+// @Accept json
+// @Produce json
+// @Param  id   path    string  true  "song id"
+// @Param song body requests.UpdateRequest true "Song data"
+// @Success 200 {object} responses.UpdateResponse
+// @Failure 400 {object} responses.ErrorResponse400
+// @Failure 500 {object} responses.ErrorResponse500
+// @Router /song/{id} [patch]
 func (e *Endpoints) UpdateSong(c *fiber.Ctx) error {
 
 	id := c.Params("id")
@@ -196,8 +228,8 @@ func (e *Endpoints) UpdateSong(c *fiber.Ctx) error {
 	err := e.services.UpdateSong(id, update)
 	if err != nil {
 		logrus.Error(err)
-		return c.Status(http.StatusNotModified).JSON(responses.ErrorResponse{
-			Code:    http.StatusNotModified,
+		return c.Status(http.StatusBadRequest).JSON(responses.ErrorResponse{
+			Code:    http.StatusBadRequest,
 			Message: "Failed to update",
 		})
 	}
@@ -206,6 +238,17 @@ func (e *Endpoints) UpdateSong(c *fiber.Ctx) error {
 	})
 }
 
+// Delete godoc
+// @Summary Delete songs
+// @Description Delete songs
+// @Tags Songs
+// @Accept json
+// @Produce json
+// @Param  id   path    string  true  "song id"
+// @Success 200 {object} responses.DeleteResponse
+// @Failure 400 {object} responses.ErrorResponse400
+// @Failure 500 {object} responses.ErrorResponse500
+// @Router /song/{id} [delete]
 func (e *Endpoints) DeleteSong(c *fiber.Ctx) error {
 
 	id := c.Params("id")
@@ -213,8 +256,8 @@ func (e *Endpoints) DeleteSong(c *fiber.Ctx) error {
 	err := e.services.DeleteSong(id)
 	if err != nil {
 		logrus.Error(err)
-		return c.Status(http.StatusInternalServerError).JSON(responses.ErrorResponse{
-			Code:    http.StatusInternalServerError,
+		return c.Status(http.StatusBadRequest).JSON(responses.ErrorResponse{
+			Code:    http.StatusBadRequest,
 			Message: "Failed to delete",
 		})
 	}

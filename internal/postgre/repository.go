@@ -3,6 +3,7 @@ package postgre
 import (
 	"EffectiveMobile/internal/requests"
 	"EffectiveMobile/internal/responses"
+	"EffectiveMobile/internal/utils"
 
 	"context"
 	"database/sql"
@@ -182,7 +183,7 @@ func (r *Repository) GetSongsWithVerses(filter SongFilter, verseFilter VerseFilt
 
 	for _, song := range songs {
 		// Разбиваем текст на куплеты
-		verses := splitIntoVerses(song.Text)
+		verses := utils.SplitIntoVerses(song.Text)
 
 		// Вычисляем начальный и конечный индексы для текущей страницы куплетов
 		startIdx := (verseFilter.Page - 1) * verseFilter.PageSize
@@ -210,43 +211,6 @@ func (r *Repository) GetSongsWithVerses(filter SongFilter, verseFilter VerseFilt
 	}
 
 	return songsWithVerses, totalCount, nil
-}
-
-// splitIntoVerses разбивает текст песни на куплеты
-func splitIntoVerses(text string) []string {
-	if text == "" {
-		return []string{}
-	}
-
-	// Разбиваем текст на строки
-	lines := strings.Split(text, "\n")
-
-	verses := make([]string, 0)
-	currentVerse := make([]string, 0)
-
-	for _, line := range lines {
-		trimmedLine := strings.TrimSpace(line)
-
-		// Если строка пустая и у нас есть накопленный куплет
-		if trimmedLine == "" && len(currentVerse) > 0 {
-			// Добавляем накопленный куплет в результат
-			verses = append(verses, strings.Join(currentVerse, "\n"))
-			currentVerse = make([]string, 0)
-			continue
-		}
-
-		// Если строка не пустая, добавляем её к текущему куплету
-		if trimmedLine != "" {
-			currentVerse = append(currentVerse, trimmedLine)
-		}
-	}
-
-	// Добавляем последний куплет, если он есть
-	if len(currentVerse) > 0 {
-		verses = append(verses, strings.Join(currentVerse, "\n"))
-	}
-
-	return verses
 }
 
 func (r *Repository) Update(id int, req requests.UpdateRequest) error {
