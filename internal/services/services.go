@@ -34,11 +34,11 @@ func (s *Services) CreateSong(song requests.SongRequest) (*responses.SongInfoRes
 
 	songResp.Group = song.Group
 	songResp.Song = song.Song
-	err = s.postgre.InsertSong(songResp)
+	err, id := s.postgre.InsertSong(songResp)
 	if err != nil {
 		return nil, err
 	}
-
+	songResp.Id = id
 	return songResp, nil
 
 }

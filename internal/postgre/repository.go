@@ -39,7 +39,7 @@ func New(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) InsertSong(song *responses.SongInfoResponse) error {
+func (r *Repository) InsertSong(song *responses.SongInfoResponse) (error, int) {
 
 	query := `
 	INSERT INTO songs ("group", song, release_date, text, link)
@@ -63,11 +63,11 @@ func (r *Repository) InsertSong(song *responses.SongInfoResponse) error {
 	err := r.db.QueryRowContext(ctx, query, args...).Scan(&songID)
 	if err != nil {
 		logrus.Info("Ошибка получения id, песня не добавлена")
-		return err
+		return err, 0
 	}
 
 	logrus.Info("Новая песня добавлена:", songID)
-	return nil
+	return nil, songID
 }
 
 func (r *Repository) GetSongs(filter SongFilter, page, limit int) ([]*responses.SongInfoResponse, int, error) {
