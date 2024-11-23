@@ -4,9 +4,7 @@ import (
 	"EffectiveMobile/internal/database"
 	"EffectiveMobile/internal/endpoints"
 	"EffectiveMobile/internal/postgre"
-	"EffectiveMobile/internal/responses"
 	"EffectiveMobile/internal/services"
-	"fmt"
 	"os"
 
 	"github.com/gofiber/fiber/v2"
@@ -47,23 +45,6 @@ func (a *App) routers() {
 	a.app.Patch("/song/:id", a.endpoints.UpdateSong)         //Обновление песни
 	a.app.Delete("/song/:id", a.endpoints.DeleteSong)        //Удаление песни
 
-	a.app.Get("/info", func(c *fiber.Ctx) error {
-		group := c.Query("group")
-
-		var response responses.SongInfoResponse
-		if group != "Muse" {
-			fmt.Println("Пусто")
-			response = responses.SongInfoResponse{}
-		} else {
-			response = responses.SongInfoResponse{
-				ReleaseDate: "16.07.2006",
-				Text:        "Ooh baby, don't you know I suffer?\nOoh baby, can you hear me moan?\nYou caught me under false pretenses\nHow long before you let me go?\n\nOoh\nYou set my soul alight\nOoh\nYou set my soul alight",
-				Link:        "https://www.youtube.com/watch?v=Xsp3_a-PMTw",
-			}
-		}
-
-		return c.Status(fiber.StatusOK).JSON(response)
-	})
 	a.app.Get("/swagger/*", swagger.HandlerDefault)
 }
 
