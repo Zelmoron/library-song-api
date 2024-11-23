@@ -18,7 +18,7 @@ const docTemplate = `{
     "paths": {
         "/song": {
             "post": {
-                "description": "Create a new song entry",
+                "description": "Create a new song",
                 "consumes": [
                     "application/json"
                 ],

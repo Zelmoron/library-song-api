@@ -33,7 +33,7 @@ func New(services Services) *Endpoints {
 
 // CreateSong godoc
 // @Summary Add a new song
-// @Description Create a new song entry
+// @Description Create a new song
 // @Tags Songs
 // @Accept json
 // @Produce json

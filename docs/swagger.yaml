@@ -169,7 +169,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Create a new song entry
+      description: Create a new song
       parameters:
       - description: Song data
         in: body
