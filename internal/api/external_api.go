@@ -19,6 +19,7 @@ var (
 )
 
 func GetInfo(group, song string) (*responses.SongInfoResponse, error) {
+	//Получение данных из внешнего API
 	resp, err := http.Get(fmt.Sprintf("%s/info?group=%s&song=%s", os.Getenv("API_URL"), group, song))
 	if err != nil {
 		return nil, ErrInternalServerError

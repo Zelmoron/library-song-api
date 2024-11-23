@@ -45,6 +45,7 @@ func New(services Services) *Endpoints {
 // @Failure 500 {object} responses.ErrorResponse500
 // @Router /song [post]
 func (e *Endpoints) CreateSong(c *fiber.Ctx) error {
+	// Обработчик создания песни
 	var song requests.SongRequest
 	if err := c.BodyParser(&song); err != nil {
 		errResp := responses.ErrorResponse{
@@ -55,6 +56,7 @@ func (e *Endpoints) CreateSong(c *fiber.Ctx) error {
 	}
 
 	logrus.Info("Данные получены")
+
 	validate := validator.New()
 	if err := validate.Struct(song); err != nil {
 		errResp := responses.ErrorResponse{
@@ -123,8 +125,8 @@ func (e *Endpoints) CreateSong(c *fiber.Ctx) error {
 // @Failure 500 {object} responses.ErrorResponse500
 // @Router /songs [get]
 func (e *Endpoints) GetSongs(c *fiber.Ctx) error {
+	//Обработчик получения записей из базы данных
 
-	//Пагинация (выводит 10 записей)
 	page := c.QueryInt("page", 1)
 	limit := c.QueryInt("limit", 10)
 
@@ -162,10 +164,9 @@ func (e *Endpoints) GetSongs(c *fiber.Ctx) error {
 // @Failure 500 {object} responses.ErrorResponse500
 // @Router /song-verse [get]
 func (e *Endpoints) GetSongsWithVerses(c *fiber.Ctx) error {
-
-	// Получаем только название песни и количество куплетов из URL
+	//Обработчтик получения песни и куплетов в ней
 	songName := c.Query("song")
-	versesLimit := c.QueryInt("verses", 1) // По умолчанию 5 куплетов
+	versesLimit := c.QueryInt("verses", 1)
 
 	// Проверяем обязательные параметры
 	if songName == "" {
@@ -214,7 +215,7 @@ func (e *Endpoints) GetSongsWithVerses(c *fiber.Ctx) error {
 // @Failure 500 {object} responses.ErrorResponse500
 // @Router /song/{id} [patch]
 func (e *Endpoints) UpdateSong(c *fiber.Ctx) error {
-
+	//Обработчик обновления песни
 	id := c.Params("id")
 	var update requests.UpdateRequest
 	if err := c.BodyParser(&update); err != nil {
@@ -250,7 +251,7 @@ func (e *Endpoints) UpdateSong(c *fiber.Ctx) error {
 // @Failure 500 {object} responses.ErrorResponse500
 // @Router /song/{id} [delete]
 func (e *Endpoints) DeleteSong(c *fiber.Ctx) error {
-
+	//Обработчик удаления песни
 	id := c.Params("id")
 
 	err := e.services.DeleteSong(id)

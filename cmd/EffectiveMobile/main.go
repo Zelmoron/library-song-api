@@ -4,8 +4,7 @@ import (
 	"EffectiveMobile/internal/app"
 	"log"
 
-	// _ "github.com/username/reponame/docs" // замените на ваш путь к документации
-	_ "EffectiveMobile/docs" // замените "myproject" на ваш модуль, указанный в go.mod
+	_ "EffectiveMobile/docs"
 
 	"github.com/joho/godotenv"
 )

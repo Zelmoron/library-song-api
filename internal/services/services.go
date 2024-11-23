@@ -24,7 +24,7 @@ func New(postgre *postgre.Repository) *Services {
 }
 
 func (s *Services) CreateSong(song requests.SongRequest) (*responses.SongInfoResponse, error) {
-
+	//Логика создания песни
 	songResp, err := api.GetInfo(song.Group, song.Song)
 	// log.Printf("External_api info: \nDate:%s\nText:%s\nLink:%s", songResp.ReleaseDate, songResp.Text, songResp.Link)
 	if err != nil {
@@ -43,7 +43,7 @@ func (s *Services) CreateSong(song requests.SongRequest) (*responses.SongInfoRes
 }
 
 func (s *Services) GetSongs(c *fiber.Ctx, page, limit int) ([]*responses.SongInfoResponse, int, int, int, int) {
-
+	//Логика получения записей
 	filter := &postgre.SongFilter{
 		Group:       c.Query("group"),
 		Song:        c.Query("song"),
@@ -73,12 +73,11 @@ func (s *Services) GetSongs(c *fiber.Ctx, page, limit int) ([]*responses.SongInf
 }
 
 func (s *Services) GetSongsWithVerses(c *fiber.Ctx, songName string, versesLimit int) []string {
-
+	//Логика получения песни и куплетов
 	filter := postgre.SongFilter{
 		Song: songName,
 	}
 
-	// Получаем песню
 	songs, _, err := s.postgre.GetSongs(filter, 1, 1)
 
 	if err != nil {
@@ -91,16 +90,12 @@ func (s *Services) GetSongsWithVerses(c *fiber.Ctx, songName string, versesLimit
 	// Получаем куплеты
 	verses := utils.SplitIntoVerses(songs[0].Text)
 
-	// Ограничиваем количество куплетов
-	if versesLimit > len(verses) {
-		versesLimit = len(verses)
-	}
-
 	return verses
 }
 
 func (s *Services) UpdateSong(id string, update requests.UpdateRequest) error {
-	ID, err := strconv.Atoi(id)
+	//Логика обновления песни
+	ID, err := strconv.Atoi(id) //Переводим в int
 	if err != nil {
 		return err
 	}
@@ -116,7 +111,8 @@ func (s *Services) UpdateSong(id string, update requests.UpdateRequest) error {
 }
 
 func (s *Services) DeleteSong(id string) error {
-	ID, err := strconv.Atoi(id)
+	//Логика удаления песни
+	ID, err := strconv.Atoi(id) //Переводим в int
 	if err != nil {
 		return err
 	}

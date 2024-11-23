@@ -18,7 +18,6 @@ type Repository struct {
 	db *sql.DB
 }
 
-// VerseFilter содержит параметры для фильтрации куплетов
 type VerseFilter struct {
 	PageSize int // количество куплетов на странице
 	Page     int // номер страницы куплетов
@@ -30,8 +29,8 @@ type SongFilter struct {
 	ReleaseDate string   `json:"release_date"`
 	Text        string   `json:"text"`
 	Link        string   `json:"link"`
-	Verses      []string `json:"verses"`       // массив куплетов
-	TotalVerses int      `json:"total_verses"` // общее количество куплетов
+	Verses      []string `json:"verses"`
+	TotalVerses int      `json:"total_verses"`
 }
 
 func New(db *sql.DB) *Repository {
@@ -172,24 +171,20 @@ func (r *Repository) GetSongs(filter SongFilter, page, limit int) ([]*responses.
 }
 
 func (r *Repository) GetSongsWithVerses(filter SongFilter, verseFilter VerseFilter) ([]*SongFilter, int, error) {
-	// Получаем песни с помощью существующего метода
-	songs, totalCount, err := r.GetSongs(filter, 1, 100) // Получаем все подходящие песни
+
+	songs, totalCount, err := r.GetSongs(filter, 1, 100)
 	if err != nil {
 		return nil, 0, fmt.Errorf("failed to get songs: %w", err)
 	}
 
-	// Создаем слайс для результатов с куплетами
 	songsWithVerses := make([]*SongFilter, 0, len(songs))
 
 	for _, song := range songs {
-		// Разбиваем текст на куплеты
-		verses := utils.SplitIntoVerses(song.Text)
 
-		// Вычисляем начальный и конечный индексы для текущей страницы куплетов
+		verses := utils.SplitIntoVerses(song.Text) //разбить по куплетам
+
 		startIdx := (verseFilter.Page - 1) * verseFilter.PageSize
 		endIdx := startIdx + verseFilter.PageSize
-
-		// Проверяем границы
 		if startIdx >= len(verses) {
 			continue
 		}
@@ -197,7 +192,6 @@ func (r *Repository) GetSongsWithVerses(filter SongFilter, verseFilter VerseFilt
 			endIdx = len(verses)
 		}
 
-		// Создаем структуру с пагинированными куплетами
 		songWithVerses := &SongFilter{
 			Group:       song.Group,
 			Song:        song.Song,
@@ -225,7 +219,6 @@ func (r *Repository) Update(id int, req requests.UpdateRequest) error {
 		return fmt.Errorf("failed to check song existence: %w", err)
 	}
 
-	// Выполняем обновление
 	updateQuery := `
         UPDATE songs
         SET

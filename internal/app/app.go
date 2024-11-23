@@ -45,7 +45,7 @@ func (a *App) routers() {
 	a.app.Get("/songs", a.endpoints.GetSongs)                //получение всех песен с пагинацией и фильтрацией
 	a.app.Get("/song-verse", a.endpoints.GetSongsWithVerses) //получение песни и пагинация по куплетам
 	a.app.Patch("/song/:id", a.endpoints.UpdateSong)         //Обновление песни
-	a.app.Delete("/song/:id", a.endpoints.DeleteSong)
+	a.app.Delete("/song/:id", a.endpoints.DeleteSong)        //Удаление песни
 
 	a.app.Get("/info", func(c *fiber.Ctx) error {
 		group := c.Query("group")
