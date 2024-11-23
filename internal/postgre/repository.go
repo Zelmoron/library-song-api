@@ -72,7 +72,7 @@ func (r *Repository) InsertSong(song *responses.SongInfoResponse) error {
 
 func (r *Repository) GetSongs(filter SongFilter, page, limit int) ([]*responses.SongInfoResponse, int, error) {
 	query := `
-        SELECT "group", song, release_date, text, link
+        SELECT id ,"group", song, release_date, text, link
         FROM songs
         WHERE 1=1`
 
@@ -151,6 +151,7 @@ func (r *Repository) GetSongs(filter SongFilter, page, limit int) ([]*responses.
 	for rows.Next() {
 		song := &responses.SongInfoResponse{}
 		err := rows.Scan(
+			&song.Id,
 			&song.Group,
 			&song.Song,
 			&song.ReleaseDate,

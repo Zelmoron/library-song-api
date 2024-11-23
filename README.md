@@ -84,6 +84,7 @@ PATCH /song/{id}
     "total_pages": 4,
     "songs": [
         {
+            "id":1,
             "group": "Muse",
             "song": "Supermassive Black Hole",
             "text": "...",

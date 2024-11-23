@@ -13,6 +13,7 @@ type (
 	}
 	// @Description Response structure containing song information
 	SongInfoResponse struct {
+		Id          int    `json:"id" example:"1" swagger:"description:id"`
 		Group       string `json:"group" example:"Muse" swagger:"description:Band or artist name"`
 		Song        string `json:"song" example:"Supermassive Black Hol" swagger:"description:Song title"`
 		ReleaseDate string `json:"releaseDate" validate:"required,min=0" example:"16.07.2006" swagger:"description:Release date"`

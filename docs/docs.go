@@ -442,6 +442,10 @@ const docTemplate = `{
                     "type": "string",
                     "example": "Muse"
                 },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
                 "link": {
                     "type": "string",
                     "minLength": 0,
