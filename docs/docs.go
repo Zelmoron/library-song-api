@@ -96,6 +96,12 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
+                        "description": "Group filter",
+                        "name": "group",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
                         "description": "Verses filter",
                         "name": "verses",
                         "in": "query"
@@ -460,6 +466,9 @@ const docTemplate = `{
         "responses.SongResponse": {
             "type": "object",
             "properties": {
+                "group": {
+                    "type": "string"
+                },
                 "song": {
                     "type": "string"
                 },

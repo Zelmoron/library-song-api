@@ -16,7 +16,7 @@ import (
 type Services interface {
 	CreateSong(requests.SongRequest) (*responses.SongInfoResponse, error)
 	GetSongs(*fiber.Ctx, int, int) ([]*responses.SongInfoResponse, int, int, int, int)
-	GetSongsWithVerses(*fiber.Ctx, string, int) []string
+	GetSongsWithVerses(*fiber.Ctx, string, string, int) ([]string, []*responses.SongInfoResponse)
 	UpdateSong(string, requests.UpdateRequest) error
 	DeleteSong(string) error
 }
@@ -157,6 +157,7 @@ func (e *Endpoints) GetSongs(c *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Param song query string false "Song filter"
+// @Param group query string false "Group filter"
 // @Param verses query string false "Verses filter"
 // @Success 200 {object} responses.SongResponse
 // @Failure 400 {object} responses.ErrorResponse400
@@ -166,10 +167,11 @@ func (e *Endpoints) GetSongs(c *fiber.Ctx) error {
 func (e *Endpoints) GetSongsWithVerses(c *fiber.Ctx) error {
 	//Обработчтик получения песни и куплетов в ней
 	songName := c.Query("song")
+	group := c.Query("group")
 	versesLimit := c.QueryInt("verses", 1)
 
-	// Проверяем обязательные параметры
-	if songName == "" {
+	if songName == "" || group == "" {
+		logrus.Info("Песня или группа не должна/ы быть пустой")
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Song name is required",
 		})
@@ -181,7 +183,7 @@ func (e *Endpoints) GetSongsWithVerses(c *fiber.Ctx) error {
 		})
 	}
 
-	verses := e.services.GetSongsWithVerses(c, songName, versesLimit)
+	verses, song := e.services.GetSongsWithVerses(c, songName, group, versesLimit)
 	if len(verses) == 0 {
 		logrus.Error("Ошибка получения песни")
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
@@ -195,7 +197,8 @@ func (e *Endpoints) GetSongsWithVerses(c *fiber.Ctx) error {
 		})
 	}
 	response := responses.SongResponse{
-		Song:   songName,
+		Song:   song[0].Song,
+		Group:  song[0].Group,
 		Verses: verses[:versesLimit],
 	}
 

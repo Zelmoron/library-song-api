@@ -3,6 +3,7 @@ package responses
 type (
 	SongResponse struct {
 		Song   string   `json:"song"`
+		Group  string   `json:"group"`
 		Verses []string `json:"verses"`
 	}
 	/// @Description Структура ответа при возникновении ошибки

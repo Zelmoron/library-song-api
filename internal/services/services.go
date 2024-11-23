@@ -73,25 +73,26 @@ func (s *Services) GetSongs(c *fiber.Ctx, page, limit int) ([]*responses.SongInf
 
 }
 
-func (s *Services) GetSongsWithVerses(c *fiber.Ctx, songName string, versesLimit int) []string {
+func (s *Services) GetSongsWithVerses(c *fiber.Ctx, songName string, group string, versesLimit int) ([]string, []*responses.SongInfoResponse) {
 	//Логика получения песни и куплетов
 	filter := postgre.SongFilter{
-		Song: songName,
+		Song:  songName,
+		Group: group,
 	}
 
 	songs, _, err := s.postgre.GetSongs(filter, 1, 1)
 
 	if err != nil {
-		return []string{}
+		return []string{}, nil
 	}
 
 	if len(songs) == 0 {
-		return []string{}
+		return []string{}, nil
 	}
 	// Получаем куплеты
 	verses := utils.SplitIntoVerses(songs[0].Text)
 
-	return verses
+	return verses, songs
 }
 
 func (s *Services) UpdateSong(id string, update requests.UpdateRequest) error {

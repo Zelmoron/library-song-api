@@ -123,6 +123,8 @@ definitions:
     type: object
   responses.SongResponse:
     properties:
+      group:
+        type: string
       song:
         type: string
       verses:
@@ -210,6 +212,10 @@ paths:
       - description: Song filter
         in: query
         name: song
+        type: string
+      - description: Group filter
+        in: query
+        name: group
         type: string
       - description: Verses filter
         in: query
