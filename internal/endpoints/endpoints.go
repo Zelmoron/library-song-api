@@ -173,7 +173,7 @@ func (e *Endpoints) GetSongsWithVerses(c *fiber.Ctx) error {
 	if songName == "" || group == "" {
 		logrus.Info("Песня или группа не должна/ы быть пустой")
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Song name is required",
+			"error": "Song/group name is required",
 		})
 	}
 
